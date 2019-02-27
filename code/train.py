@@ -12,12 +12,6 @@ DATA_FOLDER = "/blog-dvc/data"
 NUM_CLASSES = 10 # number of digits
 BATCH_SIZE = 50
 
-#model = Sequential()
-#model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
-#model.add(MaxPooling2D(pool_size=(2, 2)))
-#model.add(Flatten())
-#model.add(Dense(NUM_CLASSES, activation='softmax'))
-#model.compile(loss=keras.losses.categorical_crossentropy, metrics=['accuracy'], optimizer=keras.optimizers.Adam())
 model = Sequential()
 model.add(Conv2D(32, (5, 5), input_shape=(28, 28, 1), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
