@@ -13,10 +13,13 @@ DATA_FOLDER = "/blog-dvc/data"
 MODEL_FOLDER = "/blog-dvc/model"
 NUM_CLASSES = 10 # number of digits
 BATCH_SIZE = 50
+with open('/blog-dvc/config/train-config.json') as f:
+    data = json.load(f)
+    num_conv_filters = data["num_conv_filters"]
 
 # define model
 model = Sequential()
-model.add(Conv2D(32, (5, 5), input_shape=(28, 28, 1), activation='relu'))
+model.add(Conv2D(num_conv_filters, (5, 5), input_shape=(28, 28, 1), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.2))
 model.add(Flatten())

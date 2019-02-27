@@ -6,9 +6,12 @@ import scipy.misc as smp
 import sys
 import os
 import numpy as np
+import json
 
 data_folder = "/blog-dvc/data"
-data_rate = float(sys.argv[1])
+with open('/blog-dvc/config/data-config.json') as f:
+    data = json.load(f)
+    train_data_size = data["train_data_size"]
 
 def create_destination_folders_if_necessary():
     for i in range(0, 10):
@@ -36,5 +39,5 @@ if __name__ == "__main__":
         if k % 100 == 0:
             print("wrote {}/{} images".format(k, len(Y)))
 
-        if k >= len(X) * data_rate:
+        if k >= len(X) * train_data_size:
             break
