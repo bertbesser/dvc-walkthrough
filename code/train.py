@@ -30,22 +30,16 @@ for digit in range(NUM_CLASSES):
         X.append(im)
         y.append(digit)
 
-# reformat data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-X_train = np.array(X_train)
-y_train = np.array(y_train)
-X_test = np.array(X_test)
-y_test = np.array(y_test)
-X_train = np.dot(X_train[...,:4], [1,0,0])
-X_test = np.dot(X_test[...,:4], [1,0,0])
-X_train = X_train / 255
-X_test = X_test / 255
-X_train = X_train.reshape(X_train.shape[0], 28, 28, 1).astype('float32')
-X_test = X_test.reshape(X_test.shape[0], 28, 28, 1).astype('float32')
-y_train = keras.utils.np_utils.to_categorical(y_train)
-y_test = keras.utils.np_utils.to_categorical(y_test)
+X = np.array(X)
+X = np.dot(X[...,:4], [1,0,0])
+X = X / 255
+X = X.reshape(X.shape[0], 28, 28, 1).astype('float32')
+
+y = np.array(y)
+y = keras.utils.np_utils.to_categorical(y)
 
 # train
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=BATCH_SIZE, epochs=10, verbose=1)
 
 # generate output
