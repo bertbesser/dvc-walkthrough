@@ -21,3 +21,4 @@ git checkout master
 ls data # still fails, since dvc did not recreate the data yet
 dvc checkout
 ls data # success, dvc restored all data
+python code/train.py
