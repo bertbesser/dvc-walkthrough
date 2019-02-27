@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 from scipy import misc
+import json
 
 DATA_FOLDER = "/blog-dvc/data"
 MODEL_FOLDER = "/blog-dvc/model"
@@ -46,5 +47,7 @@ model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=BATCH_SIZE, epoch
 os.makedirs(MODEL_FOLDER, exist_ok=True)
 model.save(MODEL_FOLDER + '/model.h5')
 
-score = model.evaluate(X_test, y_test, verbose=1)
-print(str(model.metrics_names) + "=" + str(score))
+model_metrics = model.evaluate(X_test, y_test, verbose=1)
+metrics = {model.metrics_names[i] : model_metrics[i] for i in range(len(model_metrics))}
+with open(MODEL_FOLDER + '/metrics.json', 'w') as outfile:
+    json.dump(metrics, outfile)

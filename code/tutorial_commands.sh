@@ -20,7 +20,7 @@ dvc run -f loaddata.dvc -o /blog-dvc/data python /blog-dvc/code/load_data.py 0.0
 echo data >> .gitignore # this folder will be managed by dvc, git can safely ignore this folder
 git add loaddata.dvc .gitignore
 git commit -m "0.01 load data"
-dvc run -f train.dvc -d /blog-dvc/data -o /blog-dvc/model python code/train.py
+dvc run -f train.dvc -d /blog-dvc/data -M /blog-dvc/model/metrics.json -o /blog-dvc/model python code/train.py
 echo model >> .gitignore
 git add train.dvc .gitignore
 git commit -m "0.01 train"
@@ -39,7 +39,7 @@ ls data # success, dvc restored all data
 ls model # success, dvc restored the model
 
 dvc run --overwrite-dvcfile -f loaddata.dvc -o /blog-dvc/data python /blog-dvc/code/load_data.py 0.02
-dvc run --overwrite-dvcfile -f train.dvc -d /blog-dvc/data -o /blog-dvc/model python code/train.py
+dvc run --overwrite-dvcfile -f train.dvc -d /blog-dvc/data -M /blog-dvc/model/metrics.json -o /blog-dvc/model python code/train.py
 git add loaddata.dvc train.dvc
 git commit -m "0.02 data and training"
 git tag 0.02
