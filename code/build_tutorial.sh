@@ -15,7 +15,7 @@ dvc init # init dvc
 git status
 git add . # add all dvc core files
 git commit -m "init dvc"
-git tag 0.0
+git tag -a 0.0 -m "0.0"
 git status
 
 mkdir config
@@ -35,7 +35,7 @@ dvc metrics modify model/metrics.json --type json --xpath acc # set desired form
 dvc metrics show
 git add model/metrics.json evaluate.dvc
 git commit -m "0.1 evaluate"
-git tag 0.1
+git tag -a 0.1 -m "0.1"
 git status
 
 git checkout 0.0
@@ -54,7 +54,7 @@ echo '{ "train_data_size" : 0.2 }' > config/preprocess.json
 dvc repro evaluate.dvc
 git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
 git commit -m "0.2 data, config, and training"
-git tag 0.2
+git tag -a 0.2 -m "0.2"
 git status
 
 # dvc pipeline show --ascii evaluate.dvc
@@ -68,6 +68,21 @@ dvc repro train.dvc # reload data and retrain
 dvc repro evaluate.dvc # only evaluation needs to be performed
 git add config/preprocess.json config/train.json evaluate.dvc preprocess.dvc train.dvc model/metrics.json
 git commit -m "0.3"
-git tag 0.3
+git tag -a 0.3 -m "0.3"
 
 dvc metrics show -T
+
+mkdir /remote/cache
+dvc remote add -d fake_remote /remote/cache
+git add .dvc/config
+git commit -m "configure remote"
+dvc push -v -T
+
+git remote add origin /remote/git-repo
+(mkdir /remote/git-repo && cd /remote/git-repo && git init --bare)
+git push -u origin master
+git push -u origin 0.1
+git push -u origin 0.2
+git push -u origin 0.3
+
+
