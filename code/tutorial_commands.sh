@@ -18,14 +18,14 @@ git status
 
 mkdir /blog-dvc/config
 echo '{ "train_data_size" : 0.01 }' > /blog-dvc/config/preprocess.json
-echo '{ "num_conv_filters" : 32 }' > /blog-dvc/config/train-config.json
-git add config/preprocess.json config/train-config.json
+echo '{ "num_conv_filters" : 32 }' > /blog-dvc/config/train.json
+git add config/preprocess.json config/train.json
 git commit -m "add config"
 dvc run -d /blog-dvc/config/preprocess.json -f preprocess.dvc -o /blog-dvc/data python /blog-dvc/code/preprocess.py
 echo data >> .gitignore # this folder will be managed by dvc, git can safely ignore this folder
 git add preprocess.dvc .gitignore
 git commit -m "0.01 load data"
-dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train-config.json -M /blog-dvc/model/metrics.json -o /blog-dvc/model/model.h5 python code/train.py
+dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train.json -M /blog-dvc/model/metrics.json -o /blog-dvc/model/model.h5 python code/train.py
 echo model/model.h5 >> .gitignore
 git add train.dvc model/metrics.json .gitignore
 git commit -m "0.01 train"
@@ -54,7 +54,7 @@ git status
 # dvc pipeline show --ascii train.dvc
 
 dvc repro train.dvc # nothing happens
-echo '{ "num_conv_filters" : 64 }' > /blog-dvc/config/train-config.json
+echo '{ "num_conv_filters" : 64 }' > /blog-dvc/config/train.json
 dvc repro train.dvc # only retraining, and only dep/output checksums changed
 dvc repro train.dvc # nothing happens
 echo '{ "train_data_size" : 0.03 }' > config/preprocess.json

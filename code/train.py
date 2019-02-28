@@ -13,7 +13,7 @@ DATA_FOLDER = "/blog-dvc/data"
 MODEL_FOLDER = "/blog-dvc/model"
 NUM_CLASSES = 10 # number of digits
 BATCH_SIZE = 50
-with open('/blog-dvc/config/train-config.json') as f:
+with open('/blog-dvc/config/train.json') as f:
     data = json.load(f)
     num_conv_filters = data["num_conv_filters"]
 
