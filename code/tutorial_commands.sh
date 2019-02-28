@@ -63,3 +63,7 @@ dvc repro train.dvc # nothing happens
 echo '{ "train_data_size" : 0.03 }' > config/preprocess.json
 dvc repro train.dvc # reload data and retrain
 dvc repro evaluate.dvc # only evaluation needs to be performed
+git add config/preprocess.json config/train.json evaluate.dvc preprocess.dvc train.dvc model/metrics.json
+git commit -m "0.03"
+git tag 0.03
+
