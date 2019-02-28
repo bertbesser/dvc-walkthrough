@@ -13,33 +13,37 @@ dvc init # init dvc
 git status
 git add . # add all dvc core files
 git commit -m "init dvc"
-git tag 0.00
+git tag 0.0
 git status
 
 mkdir /blog-dvc/config
-echo '{ "train_data_size" : 0.01 }' > /blog-dvc/config/preprocess.json
+echo '{ "train_data_size" : 0.1 }' > /blog-dvc/config/preprocess.json
 echo '{ "num_conv_filters" : 32 }' > /blog-dvc/config/train.json
 git add config/preprocess.json config/train.json
 git commit -m "add config"
 dvc run -d /blog-dvc/config/preprocess.json -f preprocess.dvc -o /blog-dvc/data python /blog-dvc/code/preprocess.py
 echo data >> .gitignore # this folder will be managed by dvc, git can safely ignore this folder
 git add preprocess.dvc .gitignore
-git commit -m "0.01 load data"
+git commit -m "0.1 load data"
 dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train.json -o /blog-dvc/model/model.h5 python code/train.py
 echo model/model.h5 >> .gitignore # this file is managed by dvc
 echo code/__pycache__ >> .gitignore # files in this folder are managed by python
 git add train.dvc .gitignore
-git commit -m "0.01 train"
+git commit -m "0.1 train"
 dvc run -f evaluate.dvc -d /blog-dvc/model/model.h5 -M /blog-dvc/model/metrics.json python code/evaluate.py
+dvc metrics show
+dvc metrics modify model/metrics.json --type json --xpath acc # set desired format first; changing it later will not apply to previously committed versions
+dvc metrics show
 git add model/metrics.json evaluate.dvc
-git tag 0.01
+git commit -m "0.1 evaluate"
+git tag 0.1
 git status
 
-git checkout 0.00
+git checkout 0.0
 dvc checkout # dvc removes data and model folders
 ls data # fails, since this version does not contain data
 ls model # fails, since this version does not have a trained model
-git checkout 0.01
+git checkout 0.1
 ls data # still fails, since dvc did not recreate the data yet
 ls model # still fails, since dvc did not recreate the model yet
 dvc checkout
@@ -47,11 +51,11 @@ ls data # success, dvc restored all data
 ls model # success, dvc restored the model
 
 git checkout master
-echo '{ "train_data_size" : 0.02 }' > /blog-dvc/config/preprocess.json
+echo '{ "train_data_size" : 0.2 }' > /blog-dvc/config/preprocess.json
 dvc repro evaluate.dvc
 git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
-git commit -m "0.02 data, config, and training"
-git tag 0.02
+git commit -m "0.2 data, config, and training"
+git tag 0.2
 git status
 
 # dvc pipeline show --ascii evaluate.dvc
@@ -60,10 +64,11 @@ dvc repro train.dvc # nothing happens
 echo '{ "num_conv_filters" : 64 }' > /blog-dvc/config/train.json
 dvc repro train.dvc # only retraining, and only dep/output checksums changed
 dvc repro train.dvc # nothing happens
-echo '{ "train_data_size" : 0.03 }' > config/preprocess.json
+echo '{ "train_data_size" : 0.3 }' > config/preprocess.json
 dvc repro train.dvc # reload data and retrain
 dvc repro evaluate.dvc # only evaluation needs to be performed
 git add config/preprocess.json config/train.json evaluate.dvc preprocess.dvc train.dvc model/metrics.json
-git commit -m "0.03"
-git tag 0.03
+git commit -m "0.3"
+git tag 0.3
 
+dvc metrics show -T
