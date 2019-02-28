@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 git status # this is not a git repo yet
 
 git init # let's make it a git repo
@@ -46,8 +45,7 @@ ls model # success, dvc restored the model
 
 git checkout master
 echo '{ "train_data_size" : 0.02 }' > /blog-dvc/config/data-config.json
-dvc run --overwrite-dvcfile -f loaddata.dvc -d /blog-dvc/config/data-config.json -o /blog-dvc/data python /blog-dvc/code/load_data.py
-dvc run --overwrite-dvcfile -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train-config.json -M /blog-dvc/model/metrics.json -o /blog-dvc/model/model.h5 python code/train.py
+dvc repro train.dvc
 git add loaddata.dvc train.dvc config/data-config.json model/metrics.json
 git commit -m "0.02 data, config, and training"
 git tag 0.02
