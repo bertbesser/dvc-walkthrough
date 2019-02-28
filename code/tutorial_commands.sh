@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PYTHONDONTWRITEBYTECODE=1
+
 git status # this is not a git repo yet
 
 git init # let's make it a git repo
@@ -16,21 +18,18 @@ git commit -m "init dvc"
 git tag 0.0
 git status
 
-mkdir /blog-dvc/config
-echo '{ "train_data_size" : 0.1 }' > /blog-dvc/config/preprocess.json
-echo '{ "num_conv_filters" : 32 }' > /blog-dvc/config/train.json
+mkdir config
+echo '{ "train_data_size" : 0.1 }' > config/preprocess.json
+echo '{ "num_conv_filters" : 32 }' > config/train.json
 git add config/preprocess.json config/train.json
 git commit -m "add config"
-dvc run -d /blog-dvc/config/preprocess.json -f preprocess.dvc -o /blog-dvc/data python /blog-dvc/code/preprocess.py
-echo data >> .gitignore # this folder will be managed by dvc, git can safely ignore this folder
+dvc run -d config/preprocess.json -f preprocess.dvc -o data python code/preprocess.py
 git add preprocess.dvc .gitignore
 git commit -m "0.1 load data"
-dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train.json -o /blog-dvc/model/model.h5 python code/train.py
-echo model/model.h5 >> .gitignore # this file is managed by dvc
-echo code/__pycache__ >> .gitignore # files in this folder are managed by python
-git add train.dvc .gitignore
+dvc run -f train.dvc -d data -d config/train.json -o model/model.h5 python code/train.py
+git add train.dvc model/.gitignore 
 git commit -m "0.1 train"
-dvc run -f evaluate.dvc -d /blog-dvc/model/model.h5 -M /blog-dvc/model/metrics.json python code/evaluate.py
+dvc run -f evaluate.dvc -d model/model.h5 -M model/metrics.json python code/evaluate.py
 dvc metrics show
 dvc metrics modify model/metrics.json --type json --xpath acc # set desired format first; changing it later will not apply to previously committed versions
 dvc metrics show
@@ -51,7 +50,7 @@ ls data # success, dvc restored all data
 ls model # success, dvc restored the model
 
 git checkout master
-echo '{ "train_data_size" : 0.2 }' > /blog-dvc/config/preprocess.json
+echo '{ "train_data_size" : 0.2 }' > config/preprocess.json
 dvc repro evaluate.dvc
 git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
 git commit -m "0.2 data, config, and training"
@@ -61,7 +60,7 @@ git status
 # dvc pipeline show --ascii evaluate.dvc
 
 dvc repro train.dvc # nothing happens
-echo '{ "num_conv_filters" : 64 }' > /blog-dvc/config/train.json
+echo '{ "num_conv_filters" : 64 }' > config/train.json
 dvc repro train.dvc # only retraining, and only dep/output checksums changed
 dvc repro train.dvc # nothing happens
 echo '{ "train_data_size" : 0.3 }' > config/preprocess.json
