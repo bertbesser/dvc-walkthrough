@@ -8,6 +8,7 @@ import numpy as np
 import os
 from scipy import misc
 import json
+from load_data import load_data
 
 DATA_FOLDER = "/blog-dvc/data"
 MODEL_FOLDER = "/blog-dvc/model"
@@ -27,20 +28,7 @@ model.add(Dense(NUM_CLASSES, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # load training data
-X, y = [], []
-for digit in range(NUM_CLASSES):
-    for image in os.listdir(os.path.join(DATA_FOLDER, str(digit))):
-        im = misc.imread(os.path.join(DATA_FOLDER, str(digit), image))
-        X.append(im)
-        y.append(digit)
-
-X = np.array(X)
-X = np.dot(X[...,:4], [1,0,0])
-X = X / 255
-X = X.reshape(X.shape[0], 28, 28, 1).astype('float32')
-
-y = np.array(y)
-y = keras.utils.np_utils.to_categorical(y)
+X, y = load_data()
 
 # train
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
@@ -49,8 +37,3 @@ model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=BATCH_SIZE, epoch
 # generate output
 os.makedirs(MODEL_FOLDER, exist_ok=True)
 model.save(MODEL_FOLDER + '/model.h5')
-
-model_metrics = model.evaluate(X_test, y_test, verbose=1)
-metrics = {model.metrics_names[i] : model_metrics[i] for i in range(len(model_metrics))}
-with open(MODEL_FOLDER + '/metrics.json', 'w') as outfile:
-    json.dump(metrics, outfile)

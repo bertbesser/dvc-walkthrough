@@ -25,10 +25,13 @@ dvc run -d /blog-dvc/config/preprocess.json -f preprocess.dvc -o /blog-dvc/data 
 echo data >> .gitignore # this folder will be managed by dvc, git can safely ignore this folder
 git add preprocess.dvc .gitignore
 git commit -m "0.01 load data"
-dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train.json -M /blog-dvc/model/metrics.json -o /blog-dvc/model/model.h5 python code/train.py
-echo model/model.h5 >> .gitignore
-git add train.dvc model/metrics.json .gitignore
+dvc run -f train.dvc -d /blog-dvc/data -d /blog-dvc/config/train.json -o /blog-dvc/model/model.h5 python code/train.py
+echo model/model.h5 >> .gitignore # this file is managed by dvc
+echo code/__pycache__ >> .gitignore # files in this folder are managed by python
+git add train.dvc .gitignore
 git commit -m "0.01 train"
+dvc run -f evaluate.dvc -d /blog-dvc/model/model.h5 -M /blog-dvc/model/metrics.json python code/evaluate.py
+git add model/metrics.json evaluate.dvc
 git tag 0.01
 git status
 
@@ -45,13 +48,13 @@ ls model # success, dvc restored the model
 
 git checkout master
 echo '{ "train_data_size" : 0.02 }' > /blog-dvc/config/preprocess.json
-dvc repro train.dvc
-git add preprocess.dvc train.dvc config/preprocess.json model/metrics.json
+dvc repro evaluate.dvc
+git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
 git commit -m "0.02 data, config, and training"
 git tag 0.02
 git status
 
-# dvc pipeline show --ascii train.dvc
+# dvc pipeline show --ascii evaluate.dvc
 
 dvc repro train.dvc # nothing happens
 echo '{ "num_conv_filters" : 64 }' > /blog-dvc/config/train.json
@@ -59,3 +62,4 @@ dvc repro train.dvc # only retraining, and only dep/output checksums changed
 dvc repro train.dvc # nothing happens
 echo '{ "train_data_size" : 0.03 }' > config/preprocess.json
 dvc repro train.dvc # reload data and retrain
+dvc repro evaluate.dvc # only evaluation needs to be performed
