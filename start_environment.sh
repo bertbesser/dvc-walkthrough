@@ -2,21 +2,22 @@
 
 REPO_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 MOUNT_FOLDER=$REPO_FOLDER/mount_folder
+mkdir -p $MOUNT_FOLDER
 
 docker stop dvc-walkthrough
 docker rm dvc-walkthrough
-docker build -t dvc-walkthrough .
-mkdir -p $MOUNT_FOLDER
+docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t dvc-walkthrough .
 docker run -d --mount type=bind,source=$MOUNT_FOLDER,target=/remote --name dvc-walkthrough dvc-walkthrough
 
 if [[ "$*" =~ "build" ]]; then
-  docker exec -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/build_tutorial.sh"
+  rm -rf $MOUNT_FOLDER/*
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/build_tutorial.sh"
 fi
 
 if [[ "$*" =~ "clone" ]]; then
-  docker exec -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/clone_tutorial.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/clone_tutorial.sh"
 fi
 
 if [[ "$*" =~ "bash" ]]; then
-  docker exec -ti dvc-walkthrough bash -c "cd /blog-dvc; bash"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash"
 fi
