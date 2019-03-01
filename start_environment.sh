@@ -11,13 +11,13 @@ docker run -d --mount type=bind,source=$MOUNT_FOLDER,target=/remote --name dvc-w
 
 if [[ "$*" =~ "build" ]]; then
   rm -rf $MOUNT_FOLDER/*
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/build_tutorial.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash code/build_tutorial.sh"
 fi
 
 if [[ "$*" =~ "clone" ]]; then
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash code/clone_tutorial.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash code/clone_tutorial.sh"
 fi
 
 if [[ "$*" =~ "bash" ]]; then
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /blog-dvc; bash"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash"
 fi
