@@ -1,9 +1,8 @@
 #!/bin/bash
 
-cd /
-rm -rf /dvc-walkthrough
-git clone /remote/git-repo /dvc-walkthrough
-cd /dvc-walkthrough
-ls model # no model there :(
-dvc pull -v -T
-ls model # theeere it is :)
+cd /tmp
+git clone /remote/git-repo cloned
+cd cloned
+ls data # no training data there :(
+dvc pull -T
+ls data # theeere it is :)
