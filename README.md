@@ -104,7 +104,7 @@ Finally, let's have a brief look at how DVC renders our pipeline.
 ```bash
 %% dvc pipeline show --ascii evaluate.dvc
 ```
-![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline2.jpg)
+![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline-dvc.jpg)
 
 *Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages.
 
