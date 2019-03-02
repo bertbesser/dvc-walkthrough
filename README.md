@@ -54,7 +54,7 @@ where we input raw image data and output performance metrics of the trained mode
 
 ![pipeline](https://blog.codecentric.de/files/2019/03/pipeline-2.jpg)
 
-For simplicity, we implement a dummy preprocessing stage, which just copies given training data into the repository. However, since our goal is to retrain the model as more and more training data is available, our preprocessing stage can be configured for the amount of data to be copied. This configuration is located in the file `config/preprocess.json`. Similarly, training stage configuration is located in `config/train.json`. Let's put this congiuration under version control.
+For simplicity, we implement a dummy preprocessing stage, which just copies given training data into the repository. However, since our goal is to retrain the model as more and more training data is available, our preprocessing stage can be configured for the amount of data to be copied. This configuration is located in the file `config/preprocess.json`. Similarly, training stage configuration is located in `config/train.json` (our neural network's architecture allows to alter the number of convolution filters). Let's put this congiuration under version control.
 
 ```bash
 $$ mkdir config
@@ -132,14 +132,14 @@ $$ ls data
 0  1  2  3  4  5  6  7  8  9 # one folder of images for each digit
 ```
 
-Analogously, you can skip to any of your versioned pipelines and inspect their configuration, training data, models, metrics, etc.
+Similarly, you can skip to any of your versioned pipelines and inspect their configuration, training data, models, metrics, etc.
 
 *Remark*:  Recall that DVC configures Git to ignore output data. How is versioning of such data implemented? DVC manages output data in the repository's subfolder `.dvc/cache` (which is also ignored by Git, as configured in `.dvc/.gitignore`). DVC-cached files are exposed to us as hardlinks from output files into DVC's cache folder, where DVC takes care of managing the hardlinks.
 
 ![dvc cache](https://blog.codecentric.de/files/2019/03/dvc_cache.jpg)
 
 # Reproduce the pipeline
-Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it is easy af. First, note that if we do not change any dependencies, there is nothing to be reproduced.
+Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is easy af. First, note that if we do not change any dependencies, there is nothing to be reproduced.
 
 ```bash
 $$ dvc repro evaluate.dvc
@@ -150,7 +150,9 @@ Stage 'evaluate.dvc' didnt change.
 Pipeline is up to date. Nothing to reproduce.
 ```
 
-When changing the amount of training data, the entire pipeline can be reproduced by calling the `dvc repro`-command with parameter `evaluate.dvc`, which defines the final stage of the pipeline.
+When changing the amount of training data (see pen icon in the following figure) and calling the `dvc repro`-command with parameter `evaluate.dvc` for the last stage (red play icon), the entire pipeline will be reproduced (red arrows).
+
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-all.jpg)
 
 ```bash
 $$ echo '{ "train_data_size" : 0.2 }' > config/preprocess.json
@@ -198,7 +200,9 @@ $$ git tag -a 0.2 -m "0.2 more training data"
 ```
 
 # Reproduce partially
-What if only training *configuration* changes, but training *data* remains the same? All stages but the preprocessing stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline.
+What if only training *configuration* changes, but training *data* remains the same? All stages but the preprocessing stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline (we increase the number of convolution filters in our neural network).
+
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-train.jpg)
 
 ```bash
 $$ echo '{ "num_conv_filters" : 64 }' > config/train.json
@@ -210,7 +214,9 @@ Stage 'train.dvc' changed.
 Reproducing 'train.dvc'...
 ```
 
-We can now reproduce the entire pipeline. Since we already performed re-training, only the evaluation stage will be executed.
+We can now reproduce the entire pipeline. Since we already performed re-training, the trained model was changed also, and only the evaluation stage will be executed.
+
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-evaluate.jpg)
 
 ```bash
 $$ dvc repro evaluate.dvc
