@@ -15,9 +15,9 @@ if [[ "$*" =~ "walkthrough" ]]; then
 fi
 
 if [[ "$*" =~ "clone" ]]; then
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /home/dvc; bash scripts/clone.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash /home/dvc/scripts/clone.sh
 fi
 
 if [[ "$*" =~ "bash" ]]; then
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /home/dvc; bash"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /home/dvc/walkthrough; bash"
 fi

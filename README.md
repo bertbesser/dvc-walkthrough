@@ -4,7 +4,7 @@ Meet [DVC](https://dvc.org/) (data version control), which supports you with thi
 
 ![pipeline](https://blog.codecentric.de/files/2019/03/dvc_logo.png)
 
-Implementing a DVC-*pipeline* makes all of preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
+Implementing a DVC-*pipeline* makes all of data loading, preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
 
 # A toy project
 This post walks you through an example project (available on GitHub <strong>*ADD_LINK*</strong>), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy.
@@ -46,46 +46,46 @@ $$ git tag -a 0.0 -m "freshly initialized with no pipeline defined, yet"
 
 # Define the pipeline
 Our pipeline consists of three stages, namely
-1. preprocessing,
+1. loading data,
 2. training, and
 3. evalutation,
 
-where we input raw image data and output performance metrics of the trained model. Here is a schematic:
+and the pipeline also produces performance metrics of the trained model. Here is a schematic:
 
-![pipeline](https://blog.codecentric.de/files/2019/03/pipeline-2.jpg)
+![pipeline](https://blog.codecentric.de/files/2019/03/pipeline-3.jpg)
 
-For simplicity, we implement a dummy preprocessing stage, which just copies given training data into the repository. However, since our goal is to retrain the model as more and more training data is available, our preprocessing stage can be configured for the amount of data to be copied. This configuration is located in the file `config/preprocess.json`. Similarly, training stage configuration is located in `config/train.json` (our neural network's architecture allows to alter the number of convolution filters). Let's put this congiuration under version control.
+For simplicity, we implement a dummy loading stage, which just copies given raw image data into the repository. However, since our goal is to retrain the model as more and more data is available, our loading stage can be configured for the amount of data to be copied. This configuration is located in the file `config/load.json`. Similarly, training stage configuration is located in `config/train.json` (our neural network's architecture allows to alter the number of convolution filters). Let's put this congiuration under version control.
 
 ```bash
 $$ mkdir config
-$$ echo '{ "train_data_size" : 0.1 }' > config/preprocess.json
+$$ echo '{ "num_images" : 1000 }' > config/load.json
 $$ echo '{ "num_conv_filters" : 32 }' > config/train.json
-$$ git add config/preprocess.json config/train.json
+$$ git add config/load.json config/train.json
 $$ git commit -m "add config"
 ```
 
-Stages of a DVC pipeline are connected by *dependencies* and *outputs*. Dependencies and outputs are simply files. E.g. our preprocessing stage *depends* on the configuration file `config/preprocess.json`. The preprocessing stage *outputs* training image data. If upon execution of our preprocessing stage the set of training images changes, the training stage picks up these changes, since it depends on the training images. Similarly, a changed model will be evaluated to obtain its performance metrics. Once the pipeline definition is in place, DVC takes care of reproducing only those stages with changed dependencies, as we discuss in detail below.
+Stages of a DVC pipeline are connected by *dependencies* and *outputs*. Dependencies and outputs are simply files. E.g. our load stage *depends* on the configuration file `config/load.json`. The load stage *outputs* training image data. If upon execution of our load stage the set of training images changes, the training stage picks up these changes, since it depends on the training images. Similarly, a changed model will be evaluated to obtain its performance metrics. Once the pipeline definition is in place, DVC takes care of reproducing only those stages with changed dependencies, as we discuss in detail below.
 
-The following `dvc run` command configures our preprocessing stage, where the stage's definition is stored in the file given by the `-f` parameter, dependencies are provided using the `-d` parameter, and training image data is output into the folder `data` given by the `-o` parameter. DVC immediately executes the stage, already generating the desired training data.
+The following `dvc run` command configures our load stage, where the stage's definition is stored in the file given by the `-f` parameter, dependencies are provided using the `-d` parameter, and training image data is output into the folder `data` given by the `-o` parameter. DVC immediately executes the stage, already generating the desired training data.
 
 ```bash
-$$ dvc run -f preprocess.dvc -d config/preprocess.json -o data python code/preprocess.py
+$$ dvc run -f load.dvc -d config/load.json -o data python code/load.py
 Running command:
-        python code/preprocess.py
+        python code/load.py
 Computing md5 for a large directory data/2. This is only done once.
 ...
 $$ git status
         .gitignore
-        preprocess.dvc
+        load.dvc
 $$ cat .gitignore
 data
-$$ git add .gitignore preprocess.dvc
-git commit -m "init preprocess stage"
+$$ git add .gitignore load.dvc
+git commit -m "init load stage"
 ```
 
-Recall that our preprocessing stage outputs image data into the folder `data`. DVC has added the `data` folder to Git's ignore list. This is because large binary files are not to be versioned in Git repositories. See below for some implementation details.
+Recall that our load stage outputs image data into the folder `data`. DVC has added the `data` folder to Git's ignore list. This is because large binary files are not to be versioned in Git repositories. See below for some implementation details.
 
-After adding `.gitignore` and `preprocess.dvc` to version control, we define the other two stages of our pipeline analogously, see the following code block. Note the dependency of our training stage to the training config file. Since training typically takes long times (not so in our toy project, though), we output the readily trained model into a file, namely `model/model.h5`. As DVC versions this binary file, we have easy access to this version of our model in the future.
+After adding `.gitignore` and `load.dvc` to version control, we define the other two stages of our pipeline analogously, see the following code block. Note the dependency of our training stage to the training config file. Since training typically takes long times (not so in our toy project, though), we output the readily trained model into a file, namely `model/model.h5`. As DVC versions this binary file, we have easy access to this version of our model in the future.
 
 ```bash
 $$ dvc run -f train.dvc -d data -d config/train.json -o model/model.h5 python code/train.py
@@ -109,7 +109,7 @@ Finally, let's have a brief look at how DVC renders our pipeline.
 ```bash
 $$ dvc pipeline show --ascii evaluate.dvc
 ```
-![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline-dvc.jpg)
+![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline-dvc-1.jpg)
 
 *Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages like R, Spark, PyTorch, etc.
 
@@ -144,7 +144,7 @@ Pat yourself on the back. You have mastered *building* a pipeline, which is the 
 ```bash
 $$ dvc repro evaluate.dvc
 ...
-Stage 'preprocess.dvc' didnt change.
+Stage 'load.dvc' didnt change.
 Stage 'train.dvc' didnt change.
 Stage 'evaluate.dvc' didnt change.
 Pipeline is up to date. Nothing to reproduce.
@@ -152,15 +152,15 @@ Pipeline is up to date. Nothing to reproduce.
 
 When changing the amount of training data (see pen icon in the following figure) and calling the `dvc repro`-command with parameter `evaluate.dvc` for the last stage (red play icon), the entire pipeline will be reproduced (red arrows).
 
-![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-all.jpg)
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-all-1.jpg)
 
 ```bash
-$$ echo '{ "train_data_size" : 0.2 }' > config/preprocess.json
+$$ echo '{ "num_images" : 2000 }' > config/load.json
 $$ dvc repro evaluate.dvc
 ...
-Warning: Dependency 'config/preprocess.json' of 'preprocess.dvc' changed.
-Stage 'preprocess.dvc' changed.
-Reproducing 'preprocess.dvc'
+Warning: Dependency 'config/load.json' of 'load.dvc' changed.
+Stage 'load.dvc' changed.
+Reproducing 'load.dvc'
 ...
 Warning: Dependency 'data' of 'train.dvc' changed.
 Stage 'train.dvc' changed.
@@ -175,12 +175,12 @@ Observe that DVC tracks changes to dependencies and outputs through md5-sums sto
 
 ```bash
 $$ git status
-        modified:   config/preprocess.json
+        modified:   config/load.json
         modified:   evaluate.dvc
         modified:   model/metrics.json
-        modified:   preprocess.dvc
+        modified:   load.dvc
         modified:   train.dvc
-$$ git diff preprocess.dvc
+$$ git diff load.dvc
 ...
 deps:
 -- md5: 44260f0cf26e82df91b23ab9a75bf4ae
@@ -194,21 +194,21 @@ outs:
 Let us save this version of our pipeline and tag it.
 
 ```bash
-$$ git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
+$$ git add load.dvc train.dvc evaluate.dvc config/load.json model/metrics.json
 $$ git commit -m "0.2 more training data"
 $$ git tag -a 0.2 -m "0.2 more training data"
 ```
 
 # Reproduce partially
-What if only training *configuration* changes, but training *data* remains the same? All stages but the preprocessing stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline (we increase the number of convolution filters in our neural network).
+What if only training *configuration* changes, but training *data* remains the same? All stages but the load stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline (we increase the number of convolution filters in our neural network).
 
-![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-train.jpg)
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-train-1.jpg)
 
 ```bash
 $$ echo '{ "num_conv_filters" : 64 }' > config/train.json
 $$ dvc repro train.dvc
 ...
-Stage 'preprocess.dvc' didnt change.
+Stage 'load.dvc' didnt change.
 Warning: Dependency 'config/train.json' of 'train.dvc' changed.
 Stage 'train.dvc' changed.
 Reproducing 'train.dvc'...
@@ -216,12 +216,12 @@ Reproducing 'train.dvc'...
 
 We can now reproduce the entire pipeline. Since we already performed re-training, the trained model was changed also, and only the evaluation stage will be executed.
 
-![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-evaluate.jpg)
+![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-evaluate-1.jpg)
 
 ```bash
 $$ dvc repro evaluate.dvc
 ...
-Stage 'preprocess.dvc' didnt change.
+Stage 'load.dvc' didnt change.
 Stage 'train.dvc' didnt change.
 Warning: Dependency 'model/model.h5' of 'evaluate.dvc' changed.
 Stage 'evaluate.dvc' changed.
@@ -231,12 +231,12 @@ Reproducing 'evaluate.dvc'...
 Finally, let us increase the amount of available training data and trigger the entire pipeline by reproducing the `evaluate.dvc` stage.
 
 ```bash
-$$ echo '{ "train_data_size" : 0.3 }' > config/preprocess.json
+$$ echo '{ "num_images" : 3000 }' > config/load.json
 $$ dvc repro evaluate.dvc
 ...
-Warning: Dependency 'config/preprocess.json' of 'preprocess.dvc' changed.
-Stage 'preprocess.dvc' changed.
-Reproducing 'preprocess.dvc'
+Warning: Dependency 'config/load.json' of 'load.dvc' changed.
+Stage 'load.dvc' changed.
+Reproducing 'load.dvc'
 ...
 Warning: Dependency 'data' of 'train.dvc' changed.
 Stage 'train.dvc' changed.
@@ -250,7 +250,7 @@ Reproducing 'evaluate.dvc'...
 Again, we save this version of our pipeline and tag it.
 
 ```bash
-$$ git add config/preprocess.json config/train.json evaluate.dvc preprocess.dvc train.dvc model/metrics.json
+$$ git add config/load.json config/train.json evaluate.dvc load.dvc train.dvc model/metrics.json
 $$ git commit -m "0.3 more training data, more convolutions"
 $$ git tag -a 0.3 -m "0.3 more training data, more convolutions"
 ```

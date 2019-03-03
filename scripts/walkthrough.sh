@@ -17,13 +17,13 @@ git tag -a 0.0 -m "freshly initialized with no pipeline defined, yet"
 git status
 
 mkdir config
-echo '{ "train_data_size" : 0.1 }' > config/preprocess.json
+echo '{ "num_images" : 1000 }' > config/load.json
 echo '{ "num_conv_filters" : 32 }' > config/train.json
-git add config/preprocess.json config/train.json
+git add config/load.json config/train.json
 git commit -m "init config"
-dvc run -f preprocess.dvc -d config/preprocess.json -o data python code/preprocess.py
-git add preprocess.dvc .gitignore
-git commit -m "init preprocess stage"
+dvc run -f load.dvc -d config/load.json -o data python code/load.py
+git add load.dvc .gitignore
+git commit -m "init load stage"
 dvc run -f train.dvc -d data -d config/train.json -o model/model.h5 python -B code/train.py
 git add train.dvc model/.gitignore 
 git commit -m "init train stage"
@@ -50,9 +50,9 @@ ls data # success, dvc restored all data
 ls model # success, dvc restored the model
 
 git checkout master
-echo '{ "train_data_size" : 0.2 }' > config/preprocess.json
+echo '{ "num_images" : 2000 }' > config/load.json
 dvc repro evaluate.dvc
-git add preprocess.dvc train.dvc evaluate.dvc config/preprocess.json model/metrics.json
+git add load.dvc train.dvc evaluate.dvc config/load.json model/metrics.json
 git commit -m "0.2 more training data"
 git tag -a 0.2 -m "0.2 more training data"
 git status
@@ -62,10 +62,10 @@ dvc repro train.dvc # nothing happens
 echo '{ "num_conv_filters" : 64 }' > config/train.json
 dvc repro train.dvc # only retraining, and only dep/output checksums changed
 dvc repro train.dvc # nothing happens
-echo '{ "train_data_size" : 0.3 }' > config/preprocess.json
+echo '{ "num_images" : 3000 }' > config/load.json
 dvc repro train.dvc # reload data and retrain
 dvc repro evaluate.dvc # only evaluation needs to be performed
-git add config/preprocess.json config/train.json evaluate.dvc preprocess.dvc train.dvc model/metrics.json
+git add config/load.json config/train.json evaluate.dvc load.dvc train.dvc model/metrics.json
 git commit -m "0.3 more training data, more convolutions"
 git tag -a 0.3 -m "0.3 more training data, more convolutions"
 
