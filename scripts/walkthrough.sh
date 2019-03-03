@@ -71,8 +71,8 @@ git tag -a 0.3 -m "0.3 more training data, more convolutions"
 
 dvc metrics show -T
 
-mkdir /remote/cache
-dvc remote add -d fake_remote /remote/cache
+mkdir /remote/dvc-cache
+dvc remote add -d fake_remote /remote/dvc-cache
 git add .dvc/config
 git commit -m "configure remote"
 dvc push -v -T

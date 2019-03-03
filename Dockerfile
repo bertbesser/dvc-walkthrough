@@ -16,9 +16,8 @@ ADD configs/download_data.sh /download_data.sh
 ADD configs/download_data.py /download_data.py
 RUN /download_data.sh
 
-ADD code /dvc-walkthrough/code
-ADD scripts /scripts
-RUN chown -R dvc:dvc /dvc-walkthrough
-RUN chown -R dvc:dvc /scripts
+ADD code /home/dvc/walkthrough/code
+ADD scripts /home/dvc/scripts
+RUN chown -R dvc:dvc /home/dvc
 
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]

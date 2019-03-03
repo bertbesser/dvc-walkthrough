@@ -11,7 +11,7 @@ import json
 from load_data import load_data
 from keras.models import load_model
 
-MODEL_FOLDER = "/dvc-walkthrough/model"
+MODEL_FOLDER = "/home/dvc/walkthrough/model"
 
 # load training data
 X, y = load_data()

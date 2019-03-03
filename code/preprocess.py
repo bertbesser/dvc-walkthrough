@@ -5,12 +5,12 @@ import json
 # this fake preprocessing stage simply copies data to the training source folder
 # the amount of data is controlled by the preprocessing stage configuration
 
-DESTINATION_FOLDER="/dvc-walkthrough/data"
+DESTINATION_FOLDER="/home/dvc/walkthrough/data"
 
 for digit in range(10):
     os.makedirs(os.path.join(DESTINATION_FOLDER, str(digit)), exist_ok=True)
 
-with open('/dvc-walkthrough/config/preprocess.json') as f:
+with open('/home/dvc/walkthrough/config/preprocess.json') as f:
     train_data_size = json.load(f)["train_data_size"]
 
 with open("/randomly_listed_images.txt") as f:
