@@ -9,13 +9,13 @@ docker rm dvc-walkthrough
 docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) -t dvc-walkthrough .
 docker run -d --mount type=bind,source=$MOUNT_FOLDER,target=/remote --name dvc-walkthrough dvc-walkthrough
 
-if [[ "$*" =~ "build" ]]; then
+if [[ "$*" =~ "walkthrough" ]]; then
   rm -rf $MOUNT_FOLDER/*
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash code/build_tutorial.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash /scripts/walkthrough.sh"
 fi
 
 if [[ "$*" =~ "clone" ]]; then
-  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash code/clone_tutorial.sh"
+  docker exec --user dvc -ti dvc-walkthrough bash -c "cd /dvc-walkthrough; bash /scripts/clone.sh"
 fi
 
 if [[ "$*" =~ "bash" ]]; then
