@@ -11,26 +11,26 @@ This post walks you through an example project (available on GitHub <strong>*ADD
 
 ![model](https://blog.codecentric.de/files/2019/03/model.jpg)
 
-To prepare the tutorial environment, clone the above Git repository, change into the cloned directory, and run the `start_environment.sh` script with parameter `bash`, see the following code block. A docker image and container are created, and you will be logged in to the container as user `dvc` in the tutorial folder `/dvc-walkthrough`. Commands given throughout this post are contained in the script `code/build_tutorial.sh`.
+To prepare the working environment, clone the above Git repository, change into the cloned directory, and run the `start_environment.sh` script with parameter `bash`, see the following code block. A docker image and container are created, and you will be logged in to the container as user `dvc` in the working folder `/home/dvc/walkthrough`. Commands given throughout this post are contained in the script `/home/dvc/scripts/walkthrough.sh`.
 
 ```bash
 # $ is the host prompt in the cloned folder
-# $$ is the container prompt in the tutorial folder /dvc-walkthrough
+# $$ is the container prompt in the working folder /home/dvc/walkthrough
 
 $ git clone https://ADD_LINK/dvc-walkthrough.git
 $ cd dvc-walkthrough
 $ ./start_environment.sh bash
-$$ cat code/build_tutorial.sh
+$$ cat /home/dvc/scripts/walkthrough.sh
 ```
 
-(Note: Calling `./start_environment.sh build bash` additionally runs the `code/build_tutorial.sh` script.)
+(Note: Calling `./start_environment.sh walkthrough bash` additionally runs the `/home/dvc/scripts/walkthrough.sh` script.)
 
 # Prepare the repository
-The tutorial folder `/dvc-walkthrough` already contains the subfolder `code` holding the required code. Let us turn `/dvc-walkthrough` into a "DVC-enabled" Git repository. DVC is built on top of Git. All DVC configuration is versioned in the same Git repository as your model code, in the subfolder `.dvc`, see the following code block. Note that tagging this freshly initialized repository is not a must&mdash;we create a tag only for the purpose of later parts of this walkthrough.
+The working folder `/home/dvc/walkthrough` already contains the subfolder `code` holding the required code. Let us turn `/home/dvc/walkthrough` into a "DVC-enabled" Git repository. DVC is built on top of Git. All DVC configuration is versioned in the same Git repository as your model code, in the subfolder `.dvc`, see the following code block. Note that tagging this freshly initialized repository is not a must&mdash;we create a tag only for the purpose of later parts of this walkthrough.
 
 ```bash
 # Code is shortened, for brevity.
-# See code/build_tutorial.sh for complete code.
+# See /home/dvc/scripts/walkthrough.sh for complete code.
 
 $$ git init
 $$ git add code
@@ -293,8 +293,8 @@ When developing models in teams, sharing training data, readily trained models, 
 For the purpose of this walkthrough, we fake remote storage using a local folder called `/remote`. Here is how to configure the remote and push data to it.
 
 ```bash
-$$ mkdir /remote/cache
-$$ dvc remote add -d fake_remote /remote/cache # -d for making the remote default
+$$ mkdir /remote/dvc-cache
+$$ dvc remote add -d fake_remote /remote/dvc-cache # -d for making the remote default
 $$ git add .dvc/config # save the remote's configuration
 $$ git commit -m "configure remote"
 $$ dvc push -T
@@ -302,11 +302,12 @@ $$ dvc push -T
 
 The `-T` parameter pushes cached files for all tags. Note that `dvc push` intelligently pushes only new or changed data, and skips over data that has remained the same since the last push.
 
-How would your team member access your pushed data? (If you followed along in your shell, exit the container and recreate it by calling `./start_environment.sh bash`. The following steps are documented in `code/clone_tutorial.sh` and should be applied in the `/tmp`-folder.) Recall that cloning the Git repository will *not* checkout training data, etc. since such files are managed in by DVC. We need to instruct DVC to pull that data from the remote storage. Thereafter, we can access the data as before.
+How would your team member access your pushed data? (If you followed along in your shell, exit the container and recreate it by calling `./start_environment.sh bash`. The following steps are documented in `/home/dvc/scripts/clone.sh` and should be applied in the `/home/dvc`-folder.) Recall that cloning the Git repository will *not* checkout training data, etc. since such files are managed in by DVC. We need to instruct DVC to pull that data from the remote storage. Thereafter, we can access the data as before.
 
 ```bash
-$$ git clone /remote/git-repo cloned
-$$ cd cloned
+$$ cd /home/dvc
+$$ git clone /remote/git-repo walkthrough-cloned
+$$ cd walkthrough-cloned
 $$ ls data
 ls: cannot access 'data': No such file or directory # no training data there :(
 $$ dvc pull -T # -T to pull for all tags
