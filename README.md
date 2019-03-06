@@ -7,11 +7,11 @@ Meet [DVC](https://dvc.org/) (data version control), which supports you with thi
 Implementing a DVC-*pipeline* makes all of data loading, preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
 
 # A toy project
-This post walks you through an example project (available on GitHub <strong>*ADD_LINK*</strong>), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy.
+This post walks you through an example project (available on GitHub <strong>*ADD_LINK*</strong>), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy. (Note that, for intuition, in the following figure we depict a much simpler neural network architecture than actually used in the project.)
 
 ![model](https://blog.codecentric.de/files/2019/03/model.jpg)
 
-To prepare the working environment, clone the above Git repository, change into the cloned directory, and run the `start_environment.sh` script with parameter `bash`, see the following code block. A docker image and container are created, and you will be logged in to the container as user `dvc` in the working folder `/home/dvc/walkthrough`. Commands given throughout this post are contained in the script `/home/dvc/scripts/walkthrough.sh`.
+To prepare the working environment, clone the above Git repository, change into the cloned directory, and run the `start_environment.sh bash`, see the following code block. The script `start_environment.sh` creates a docker image and container, the `bash` parameter makes the script log you in to the container as user `dvc` in the working folder `/home/dvc/walkthrough`. Commands given throughout this article can be found in the script `/home/dvc/scripts/walkthrough.sh`, also available in the container. (Note: Calling `./start_environment.sh` with the additional parameter `walkthrough` executes the `walkthrough.sh` script before logging you in.)
 
 ```bash
 # $ is the host prompt in the cloned folder
@@ -22,8 +22,6 @@ $ cd dvc-walkthrough
 $ ./start_environment.sh bash
 $$ cat /home/dvc/scripts/walkthrough.sh
 ```
-
-(Note: Calling `./start_environment.sh walkthrough bash` additionally runs the `/home/dvc/scripts/walkthrough.sh` script.)
 
 # Prepare the repository
 The working folder `/home/dvc/walkthrough` already contains the subfolder `code` holding the required code. Let us turn `/home/dvc/walkthrough` into a "DVC-enabled" Git repository. DVC is built on top of Git. All DVC configuration is versioned in the same Git repository as your model code, in the subfolder `.dvc`, see the following code block. Note that tagging this freshly initialized repository is not a must&mdash;we create a tag only for the purpose of later parts of this walkthrough.
@@ -64,7 +62,7 @@ $$ git add config/load.json config/train.json
 $$ git commit -m "add config"
 ```
 
-Stages of a DVC pipeline are connected by *dependencies* and *outputs*. Dependencies and outputs are simply files. E.g. our load stage *depends* on the configuration file `config/load.json`. The load stage *outputs* training image data. If upon execution of our load stage the set of training images changes, the training stage picks up these changes, since it depends on the training images. Similarly, a changed model will be evaluated to obtain its performance metrics. Once the pipeline definition is in place, DVC takes care of reproducing only those stages with changed dependencies, as we discuss in detail below.
+Stages of a DVC pipeline are connected by *dependencies* and *outputs*. Dependencies and outputs are simply files. E.g. our load stage *depends* on the configuration file `config/load.json`. The load stage *outputs* training image data. If upon execution of our load stage the set of training images changes, the training stage picks up these changes, since it depends on the training images. Similarly, a changed model will be evaluated to obtain its performance metrics. Once the pipeline definition is in place, DVC takes care of reproducing only those stages with changed dependencies, as we discuss in detail in section [Reproduce the pipeline](#reproduce-the-pipeline).
 
 The following `dvc run` command configures our load stage, where the stage's definition is stored in the file given by the `-f` parameter, dependencies are provided using the `-d` parameter, and training image data is output into the folder `data` given by the `-o` parameter. DVC immediately executes the stage, already generating the desired training data.
 
@@ -83,7 +81,7 @@ $$ git add .gitignore load.dvc
 git commit -m "init load stage"
 ```
 
-Recall that our load stage outputs image data into the folder `data`. DVC has added the `data` folder to Git's ignore list. This is because large binary files are not to be versioned in Git repositories. See below for some implementation details.
+Recall that our load stage outputs image data into the folder `data`. DVC has added the `data` folder to Git's ignore list. This is because large binary files are not to be versioned in Git repositories. See section [DVC-cached files](#dvc-cached-files) on how DVC manages such data.
 
 After adding `.gitignore` and `load.dvc` to version control, we define the other two stages of our pipeline analogously, see the following code block. Note the dependency of our training stage to the training config file. Since training typically takes long times (not so in our toy project, though), we output the readily trained model into a file, namely `model/model.h5`. As DVC versions this binary file, we have easy access to this version of our model in the future.
 
@@ -94,7 +92,7 @@ $$ dvc run -f evaluate.dvc -d model/model.h5 -M model/metrics.json python code/e
 ...
 ```
 
-For the evaluation stage, observe the definition of the file `model/metrics.json` as a *metric* (`-M` parameter). Metrics can be inspected using the `dvc metrics` command, as we discuss below. To wrap up our first version of the pipeline, we put all stage definitions (`.dvc`-files) under version control and add a tag.
+For the evaluation stage, observe the definition of the file `model/metrics.json` as a *metric* (`-M` parameter). Metrics can be inspected using the `dvc metrics` command, as we discuss in section [Compare versions](#compare-versions). To wrap up our first version of the pipeline, we put all stage definitions (`.dvc`-files) under version control and add a tag.
 
 ```bash
 $$ git add ...
@@ -111,10 +109,12 @@ $$ dvc pipeline show --ascii evaluate.dvc
 ```
 ![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline-dvc-1.jpg)
 
-*Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages like R, Spark, PyTorch, etc.
+*Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages and frameworks like R, Spark, PyTorch, etc.
 
-# DVC-cached files
-For building up intuition on how DVC and Git work together, let us skip back to our initial Git repository version. Since no pipeline is defined, yet, none of our training data, model, or metrics exist.  Recall that DVC uses Git to keep track of which output data belongs to the checked out version. Therefore, additionally to choosing the version via the `git` command, we have to instruct DVC to synchronize outputs using the `dvc checkout` command.
+# <a name="dvc-cached-files"></a>DVC-cached files
+For building up intuition on how DVC and Git work together, let us skip back to our initial Git repository version. Since no pipeline is defined, yet, none of our training data, model, or metrics exist.
+
+Recall that DVC uses Git to keep track of which output data belongs to the checked out version. Therefore, *additionally* to choosing the version via the `git` command, we have to instruct DVC to synchronize outputs using the `dvc checkout` command. I.e., as when initializing the repository `git` and `dvc` have to be used in tandem.
 
 ```bash
 $$ git checkout 0.0
@@ -138,8 +138,8 @@ Similarly, you can skip to any of your versioned pipelines and inspect their con
 
 ![dvc cache](https://blog.codecentric.de/files/2019/03/dvc_cache.jpg)
 
-# Reproduce the pipeline
-Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is easy af. First, note that if we do not change any dependencies, there is nothing to be reproduced.
+# <a name="reproduce-the-pipeline"></a>Reproduce the pipeline
+Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is super-easy. First, note that if we do not change any dependencies, there is nothing to be reproduced.
 
 ```bash
 $$ dvc repro evaluate.dvc
@@ -255,7 +255,7 @@ $$ git commit -m "0.3 more training data, more convolutions"
 $$ git tag -a 0.3 -m "0.3 more training data, more convolutions"
 ```
 
-# Compare versions
+# <a name="compare-versions"></a>Compare versions
 Recall that we have defined a *metric* for the evaluation stage, in the file `model/metrics.json`. DVC can list metrics files for all tags in the entire Git repository, which allows us to compare model performances for various all versions of our pipeline. Clearly, increasing the amount of training data and adding convolution filters to the neural network improves the model's accuracy.
 
 ```bash
