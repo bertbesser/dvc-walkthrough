@@ -4,7 +4,7 @@ git status # this is not a git repo yet
 
 git init # let's make it a git repo
 git config user.email "bert.besser@codecentric.de"
-git config user.name "Bert Besser"
+git config user.name "bbesser"
 git add code # prepare initial import
 git commit -m "init repo"
 git status

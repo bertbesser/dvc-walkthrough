@@ -7,7 +7,7 @@ Meet [DVC](https://dvc.org/) (data version control), which supports you with thi
 Implementing a DVC-*pipeline* makes all of data loading, preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
 
 # A toy project
-This post walks you through an example project (available on GitHub <strong>*ADD_LINK*</strong>), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy. (Note that, for intuition, in the following figure we depict a much simpler neural network architecture than actually used in the project.)
+This post walks you through an example project (available in this GitHub [repository](https://github.com/bbesser/dvc-walkthrough)), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy. (Note that, for intuition, in the following figure we depict a much simpler neural network architecture than actually used in the project.)
 
 ![model](https://blog.codecentric.de/files/2019/03/model.jpg)
 
@@ -17,7 +17,7 @@ To prepare the working environment, clone the above Git repository, change into 
 # $ is the host prompt in the cloned folder
 # $$ is the container prompt in the working folder /home/dvc/walkthrough
 
-$ git clone https://ADD_LINK/dvc-walkthrough.git
+$ git clone https://github.com/bbesser/dvc-walkthrough
 $ cd dvc-walkthrough
 $ ./start_environment.sh bash
 $$ cat /home/dvc/scripts/walkthrough.sh
