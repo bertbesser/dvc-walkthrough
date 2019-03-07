@@ -6,7 +6,7 @@ Meet [DVC](https://dvc.org/) (data version control), which supports you with thi
 
 Implementing a DVC-*pipeline* makes all of data loading, preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
 
-# A toy project
+## A toy project
 This post walks you through an example project (available in this GitHub [repository](https://github.com/bbesser/dvc-walkthrough)), in which a neural network is trained to classify images of handwritten digits from the [MNIST data set](http://yann.lecun.com/exdb/mnist/). As the available image set of handwritten digits grows, we retrain the model to improve its accuracy. (Note that, for intuition, in the following figure we depict a much simpler neural network architecture than actually used in the project.)
 
 ![model](https://blog.codecentric.de/files/2019/03/model.jpg)
@@ -23,7 +23,7 @@ $ ./start_environment.sh bash
 $$ cat /home/dvc/scripts/walkthrough.sh
 ```
 
-# Prepare the repository
+## Prepare the repository
 The working folder `/home/dvc/walkthrough` already contains the subfolder `code` holding the required code. Let us turn `/home/dvc/walkthrough` into a "DVC-enabled" Git repository. DVC is built on top of Git. All DVC configuration is versioned in the same Git repository as your model code, in the subfolder `.dvc`, see the following code block. Note that tagging this freshly initialized repository is not a must&mdash;we create a tag only for the purpose of later parts of this walkthrough.
 
 ```bash
@@ -42,7 +42,7 @@ $$ git commit -m "init dvc"
 $$ git tag -a 0.0 -m "freshly initialized with no pipeline defined, yet"
 ```
 
-# Define the pipeline
+## Define the pipeline
 Our pipeline consists of three stages, namely
 1. loading data,
 2. training, and
@@ -111,7 +111,7 @@ $$ dvc pipeline show --ascii evaluate.dvc
 
 *Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages and frameworks like R, Spark, PyTorch, etc.
 
-# <a name="dvc-cached-files"></a>DVC-cached files
+## <a name="dvc-cached-files"></a>DVC-cached files
 For building up intuition on how DVC and Git work together, let us skip back to our initial Git repository version. Since no pipeline is defined, yet, none of our training data, model, or metrics exist.
 
 Recall that DVC uses Git to keep track of which output data belongs to the checked out version. Therefore, *additionally* to choosing the version via the `git` command, we have to instruct DVC to synchronize outputs using the `dvc checkout` command. I.e., as when initializing the repository `git` and `dvc` have to be used in tandem.
@@ -138,7 +138,7 @@ Similarly, you can skip to any of your versioned pipelines and inspect their con
 
 ![dvc cache](https://blog.codecentric.de/files/2019/03/dvc_cache.jpg)
 
-# <a name="reproduce-the-pipeline"></a>Reproduce the pipeline
+## <a name="reproduce-the-pipeline"></a>Reproduce the pipeline
 Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is super-easy. First, note that if we do not change any dependencies, there is nothing to be reproduced.
 
 ```bash
@@ -199,7 +199,7 @@ $$ git commit -m "0.2 more training data"
 $$ git tag -a 0.2 -m "0.2 more training data"
 ```
 
-# Reproduce partially
+## Reproduce partially
 What if only training *configuration* changes, but training *data* remains the same? All stages but the load stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline (we increase the number of convolution filters in our neural network).
 
 ![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-train-1.jpg)
@@ -255,7 +255,7 @@ $$ git commit -m "0.3 more training data, more convolutions"
 $$ git tag -a 0.3 -m "0.3 more training data, more convolutions"
 ```
 
-# <a name="compare-versions"></a>Compare versions
+## <a name="compare-versions"></a>Compare versions
 Recall that we have defined a *metric* for the evaluation stage, in the file `model/metrics.json`. DVC can list metrics files for all tags in the entire Git repository, which allows us to compare model performances for various all versions of our pipeline. Clearly, increasing the amount of training data and adding convolution filters to the neural network improves the model's accuracy.
 
 ```bash
@@ -285,7 +285,7 @@ metric:
 
 *Remark 2*: For consistent metrics display over all pipeline versions, metrics should be configured in the very beginning of your project. In this case, configuration contained in `.dvc`-files is the same for all versions.
 
-# Share data
+## Share data
 When developing models in teams, sharing training data, readily trained models, and performance metrics is crucial for efficient collaboration--each team member retraining the same model is a waste of time. Recall that stage output data is not stored in the Git repository. Instead, DVC manages these files in its `.dvc/cache` folder. DVC allows to push cached files to remote storage (SSH, NAS, Amazon, S3, ...). From there, each team member can pull that data to their individual workspace's DVC cache and work with it as usual.
 
 ![dvc remote](https://blog.codecentric.de/files/2019/03/dvc_remote.jpg)
@@ -317,5 +317,5 @@ $$ ls data
 
 *Remark*: Pushing/pulling DVC-managed data for all tags (`-T` parameter) is not advisable in general, since you will send/receive *lots* of data.
 
-# Conclusion
+## Conclusion
 DVC allows you to define (language-agnostic) reproducible ML pipelines and version pipelines *together with* their associated training data, configuration, performance metrics, etc. Performance metrics can be evaluated for all versions of a pipeline. Training data, trained models, and other associated binary data can be shared (storage-agnostic) with team members for efficient collaboration.
