@@ -142,7 +142,7 @@ Similarly, you can skip to any of your versioned pipelines and inspect their con
 ## <a name="reproduce-the-pipeline"></a>Reproduce the pipeline
 Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is super-easy. First, note that if we do not change any dependencies, there is nothing to be reproduced.
 
-<pre>h
+<pre>
 $$ dvc repro evaluate.dvc
 ...
 Stage 'load.dvc' didnt change.
