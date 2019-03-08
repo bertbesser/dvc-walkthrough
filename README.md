@@ -2,7 +2,7 @@ This post is on how to systematially organize Machine Learning (ML) model develo
 
 Meet [DVC](https://dvc.org/) (data version control), which supports you with this task, and more.
 
-![pipeline](https://blog.codecentric.de/files/2019/03/dvc_logo.png)
+![pipeline](https://blog.codecentric.de/files/2019/03/owl_sticker.png)
 
 Implementing a DVC-*pipeline* makes all of data loading, preprocessing, training, performance evaluation, etc. fully reproducible (and therefore also allows to automate retraining). Training data, model configuration, the readily trained model, and performance metrics are versioned such that you can conveniently skip back to any given version and inspect all associated configuration and data. Also, DVC provides an overview of metrics for all versions of your pipeline, which helps with identifying your best work. Training data, trained models, performance metrics, etc. are shared with team members to allow for efficient collaboration.
 
