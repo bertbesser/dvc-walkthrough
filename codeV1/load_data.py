@@ -10,7 +10,7 @@ from scipy import misc
 import json
 
 NUM_CLASSES = 10
-DATA_FOLDER = "/home/dvc/walkthrough/data"
+DATA_FOLDER = "/home/dvc/livedemo/data"
 
 def load_data():
     X, y = [], []

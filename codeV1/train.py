@@ -10,11 +10,11 @@ from scipy import misc
 import json
 from load_data import load_data
 
-DATA_FOLDER = "/home/dvc/walkthrough/data"
-MODEL_FOLDER = "/home/dvc/walkthrough/model"
+DATA_FOLDER = "/home/dvc/livedemo/data"
+MODEL_FOLDER = "/home/dvc/livedemo/model"
 NUM_CLASSES = 10 # number of digits
 BATCH_SIZE = 50
-with open('/home/dvc/walkthrough/config/train.json') as f:
+with open('/home/dvc/livedemo/config/train.json') as f:
     data = json.load(f)
     num_conv_filters = data["num_conv_filters"]
 
