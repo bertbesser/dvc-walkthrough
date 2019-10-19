@@ -19,4 +19,4 @@ docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USER=
 
 # start and login to container
 docker run -d --hostname dvc-livedemo --dns=8.8.8.8 --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
-docker exec --user $user -ti dvc-livedemo-$user bash -c "cd /home/$user; bash"
+docker exec --user $user -ti dvc-livedemo-$user bash -c "cd /home/$user; zsh"

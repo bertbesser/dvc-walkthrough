@@ -16,11 +16,15 @@ RUN /download_data.sh
 
 RUN dvc config --system core.analytics false
 
+RUN apt update
+RUN apt install -y zsh less nano
+
 # prepare user setup
 
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/fzf
 RUN chmod -R a+rw /tmp/fzf
 ADD scripts/livedemo.sh /tmp/livedemo.sh
+ADD configs/zsh_colors.sh /tmp/zsh_colors.sh
 
 # setup user
 
@@ -31,22 +35,26 @@ ARG GID=1000
 RUN groupadd -g $GID -o $USER
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $USER
 
-RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . > /home/$USER/.bash_history
-RUN chown $USER:$USER /home/$USER/.bash_history
+RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{print ": 1571499890:0;"$0}' > /home/$USER/.zsh_history
+RUN chown $USER:$USER /home/$USER/.zsh_history
 
 ADD configs/.gitconfig /home/$USER/.gitconfig
 RUN chown $USER:$USER /home/$USER/.gitconfig
 
-RUN echo "alias ls='ls --color'" >> /home/$USER/.bashrc
-RUN echo "alias ll='ls -l --color'" >> /home/$USER/.bashrc
-RUN chown $USER:$USER /home/$USER/.bashrc
+RUN su $USER -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" --unattended'
 
-RUN echo 'export PS1="\[$(tput bold)\]\[\033[38;5;74m\]\u\[$(tput sgr0)\]\[$(tput sgr0)\]\[\033[38;5;15m\]@\[$(tput bold)\]\[\033[38;5;141m\]\h\[$(tput sgr0)\]\[\033[38;5;15m\]:\[$(tput bold)\]\[\033[38;5;202m\]\W\[$(tput sgr0)\]\[\033[38;5;15m\]\\$ \[$(tput sgr0)\]"' >> /home/$USER/.bashrc
-RUN chown $USER:$USER /home/$USER/.bashrc
+RUN echo "alias ls='ls --color'" >> /home/$USER/.zshrc
+RUN echo "alias ll='ls -l --color'" >> /home/$USER/.zshrc
+RUN chown $USER:$USER /home/$USER/.zshrc
+
+RUN su $USER -c 'cp /tmp/zsh_colors.sh $HOME/.zsh_colors.sh'
+RUN echo '$HOME/.zsh_colors.sh' >> /home/$USER/.zshrc
+RUN echo 'export PS1="$FG[080]%B%n%b%f$FG[231]@%f$FG[140]%B%m%b%f$FG[231]:%f$FG[209]%B%1~%b%f$FG[231]$%f "' >> /home/$USER/.zshrc
+RUN chown $USER:$USER /home/$USER/.zshrc
 
 RUN su $USER -c "/tmp/fzf/install"
-RUN echo 'export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS" --color=dark --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef "' >> /home/$USER/.bashrc
-RUN chown $USER:$USER /home/$USER/.bashrc
+RUN echo 'export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS" --color=dark --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef "' >> /home/$USER/.zshrc
+RUN chown $USER:$USER /home/$USER/.zshrc
 
 ADD configs/.ssh/config /home/$USER/.ssh/config
 ADD configs/.ssh/id_rsa /home/$USER/.ssh/id_rsa
