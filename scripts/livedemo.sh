@@ -6,9 +6,6 @@
 
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
-# verify its fresh
-git fetch --tags
-
 
 cp -r /repo/codeV1 code
 cat code/*
@@ -74,11 +71,11 @@ echo '{ "num_conv_filters" : 64 }' > config/train.json
 dvc repro load.dvc
 dvc repro train.dvc
 git status # inspect
-git diff # inspect
+git --no-pager diff # inspect
 dvc repro evaluate.dvc
 dvc repro publish.dvc
 git status # inspect
-git diff # inspect
+git --no-pager diff # inspect
 git add .
 git commit -m 'more convolutional filters'
 git tag -a 0.3 -m "0.3 more convolutional filters"
@@ -87,7 +84,7 @@ git tag -a 0.3 -m "0.3 more convolutional filters"
 echo '{ "num_conv_filters" : 128 }' > config/train.json
 dvc repro evaluate.dvc publish.dvc
 git status # inspect
-git diff # inspect
+git --no-pager diff # inspect
 git add .
 git commit -m 'even more convolutional filters'
 git tag -a 0.4 -m '0.4 even more convolutional filters'
@@ -103,7 +100,6 @@ dvc metrics show -T
 # PART IV share with team
 ######
 
-dvc 
 git push -u origin master 0.0 0.1 0.2 0.3 0.4
 
 

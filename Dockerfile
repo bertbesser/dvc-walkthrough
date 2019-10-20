@@ -23,7 +23,6 @@ RUN apt install -y zsh less nano
 
 RUN git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/fzf
 RUN chmod -R a+rw /tmp/fzf
-ADD scripts/livedemo.sh /tmp/livedemo.sh
 ADD configs/zsh_colors.sh /tmp/zsh_colors.sh
 
 # setup user
@@ -35,11 +34,10 @@ ARG GID=1000
 RUN groupadd -g $GID -o $USER
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $USER
 
-RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{print ": 1571499890:0;"$0}' > /home/$USER/.zsh_history
-RUN chown $USER:$USER /home/$USER/.zsh_history
-
 ADD configs/.gitconfig /home/$USER/.gitconfig
 RUN chown $USER:$USER /home/$USER/.gitconfig
+RUN su $USER -c "git config --global user.name '$USER'"
+RUN su $USER -c "git config --global user.email '$USER@dvc.livedemo'"
 
 RUN su $USER -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" --unattended'
 
@@ -62,5 +60,11 @@ ADD configs/.ssh/id_rsa.pub /home/$USER/.ssh/id_rsa.pub
 ADD configs/.ssh/known_hosts /home/$USER/.ssh/known_hosts
 RUN chown -R $USER:$USER /home/$USER/.ssh
 RUN chmod 600 /home/$USER/.ssh/id_rsa
+
+# setup livedemo
+
+ADD scripts/livedemo.sh /tmp/livedemo.sh
+RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{print ": 1571499890:0;"$0}' > /home/$USER/.zsh_history
+RUN chown $USER:$USER /home/$USER/.zsh_history
 
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]

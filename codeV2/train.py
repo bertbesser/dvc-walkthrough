@@ -9,12 +9,13 @@ import os
 from scipy import misc
 import json
 from load_data import load_data
+from pathlib import Path
 
-DATA_FOLDER = "/home/dvc/livedemo/data"
-MODEL_FOLDER = "/home/dvc/livedemo/model"
+DATA_FOLDER = Path.home().as_posix() + "/livedemo/data"
+MODEL_FOLDER = Path.home().as_posix() + "/livedemo/model"
 NUM_CLASSES = 10 # number of digits
 BATCH_SIZE = 50
-with open('/home/dvc/livedemo/config/train.json') as f:
+with open(Path.home().as_posix() + '/livedemo/config/train.json') as f:
     data = json.load(f)
     num_conv_filters = data["num_conv_filters"]
 

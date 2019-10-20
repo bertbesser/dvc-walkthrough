@@ -10,8 +10,9 @@ from scipy import misc
 import json
 from load_data import load_data
 from keras.models import load_model
+from pathlib import Path
 
-MODEL_FOLDER = "/home/dvc/livedemo/model"
+MODEL_FOLDER = Path.home().as_posix() + "/livedemo/model"
 
 # load training data
 X, y = load_data()

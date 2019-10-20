@@ -8,9 +8,10 @@ import numpy as np
 import os
 from scipy import misc
 import json
+from pathlib import Path
 
 NUM_CLASSES = 10
-DATA_FOLDER = "/home/dvc/livedemo/data"
+DATA_FOLDER = Path.home().as_posix() + "/livedemo/data"
 
 def load_data():
     X, y = [], []
