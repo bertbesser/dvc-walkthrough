@@ -100,7 +100,23 @@ dvc metrics show -T
 # PART IV share with team
 ######
 
+# as alice
 git push -u origin master 0.0 0.1 0.2 0.3 0.4
+
+# as bob
+git clone git@github.com:bbesser/dvc-livedemo.git livedemo
+cd livedemo
+git checkout 0.4
+ls
+ls data
+dvc repro load.dvc
+ls data
+dvc repro publish.dvc # also trains the model
+ls model
+
+# as alice (push data to remote)
+
+
 
 
 # setup dvc remote for pushing the cache to
