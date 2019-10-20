@@ -38,15 +38,9 @@ git add train.dvc model/.gitignore
 git commit -m "create train stage"
 # stage evaluate
 dvc run -f evaluate.dvc -d model/model.h5 -M model/metrics.json python -B code/evaluate.py
+dvc metrics show
 git add model/metrics.json evaluate.dvc
 git commit -m "create evaluate stage"
-
-dvc metrics show # show entire contents of metrics file
-dvc metrics modify model/metrics.json --type json --xpath acc # set desired compact format; changing it here will apply to previously committed versions
-dvc metrics show
-
-git add evaluate.dvc
-git commit -m 'configure metrics'
 
 # tag the first pipeline config
 git tag -a 0.1 -m "0.1 initial pipeline version"
@@ -115,8 +109,10 @@ dvc repro publish.dvc # also trains the model
 ls model
 
 # as alice (push data to remote)
-
-
+## TODO
+dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
+git add .dvc/config
+git commit -m "configure remote"
 
 
 # setup dvc remote for pushing the cache to

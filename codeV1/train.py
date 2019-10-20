@@ -23,7 +23,6 @@ with open(Path.home().as_posix() + '/livedemo/config/train.json') as f:
 model = Sequential()
 model.add(Conv2D(num_conv_filters, (5, 5), input_shape=(28, 28, 1), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.2))
 model.add(Flatten())
 model.add(Dense(NUM_CLASSES, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
