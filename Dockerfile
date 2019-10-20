@@ -67,4 +67,8 @@ ADD scripts/livedemo.sh /tmp/livedemo.sh
 RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{print ": 1571499890:0;"$0}' > /home/$USER/.zsh_history
 RUN chown $USER:$USER /home/$USER/.zsh_history
 
+ADD configs/aws/config /home/$USER/.aws/config
+ADD configs/aws/credentials /home/$USER/.aws/credentials
+RUN su $USER -c 'echo "export AWS_DEFAULT_PROFILE=besser" >> $HOME/.zshrc'
+
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]

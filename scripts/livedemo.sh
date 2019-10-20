@@ -97,7 +97,7 @@ dvc metrics show -T
 # as alice
 git push -u origin master 0.0 0.1 0.2 0.3 0.4
 
-# as bob
+# as bob - reproduce
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 git checkout 0.4
@@ -108,26 +108,18 @@ ls data
 dvc repro publish.dvc # also trains the model
 ls model
 
-# as alice (push data to remote)
-## TODO
+# as alice - push to remote
 dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
 git add .dvc/config
 git commit -m "configure remote"
+dvc push -v -T
 
-
-# setup dvc remote for pushing the cache to
-mkdir /remote/dvc-cache
-dvc remote add -d fake_remote /remote/dvc-cache
-git add .dvc/config # save remote configuration, such that cached data can be pulled from it when your team colleagues checkout the git repo
-git commit -m "configure remote"
-dvc push -v -T # this is where dvc pushes cached data to the remote (for all tags)
-
-# push git repo to remote, in order to prepare part two of the tutorial
-git remote add origin /remote/git-repo
-(mkdir /remote/git-repo && cd /remote/git-repo && git init --bare)
-git push -u origin master
-git push -u origin 0.1
-git push -u origin 0.2
-git push -u origin 0.3
-
+# as chris - pull
+git clone git@github.com:bbesser/dvc-livedemo.git livedemo
+cd livedemo
+ls -Al
+ls -Al .dvc
+dvc fetch -T
+dvc pull
+git checkout 0.4
 
