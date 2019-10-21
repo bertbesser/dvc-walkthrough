@@ -7,6 +7,9 @@ RUN echo "root:root" | chpasswd
 ADD configs/tini /tini
 RUN chmod +x /tini
 
+RUN apt update
+RUN apt install -y zsh less nano
+
 ADD configs/requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
 
@@ -14,10 +17,10 @@ ADD configs/download_data.sh /download_data.sh
 ADD configs/download_data.py /download_data.py
 RUN /download_data.sh
 
-RUN dvc config --system core.analytics false
+ADD configs/requirementsDvc.txt /requirementsDvc.txt
+RUN pip install -r /requirementsDvc.txt
 
-RUN apt update
-RUN apt install -y zsh less nano
+RUN dvc config --system core.analytics false
 
 # prepare user setup
 

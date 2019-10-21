@@ -34,7 +34,7 @@ then
 
         # start container
         FAKE_REMOTE=/tmp/dvc-fake-remote
-        mkdir $FAKE_REMOTE
+        mkdir -p $FAKE_REMOTE
         docker run -d --hostname dvc-livedemo --dns=8.8.8.8 --mount type=bind,source=$FAKE_REMOTE,target=/dvc-fake-remote --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
     fi
 fi
