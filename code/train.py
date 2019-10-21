@@ -8,7 +8,7 @@ import numpy as np
 import os
 from scipy import misc
 import json
-from load_data import load_data
+from prepare_train import load_train_data
 from pathlib import Path
 
 DATA_FOLDER = Path.home().as_posix() + "/livedemo/data"
@@ -28,7 +28,7 @@ model.add(Dense(NUM_CLASSES, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # load training data
-X, y = load_data()
+X, y = load_train_data()
 
 # train
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)

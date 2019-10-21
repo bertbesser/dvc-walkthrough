@@ -33,7 +33,9 @@ then
         docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USER=$user -t dvc-livedemo-$user .
 
         # start container
-        docker run -d --hostname dvc-livedemo --dns=8.8.8.8 --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
+        FAKE_REMOTE=/tmp/dvc-fake-remote
+        mkdir $FAKE_REMOTE
+        docker run -d --hostname dvc-livedemo --dns=8.8.8.8 --mount type=bind,source=$FAKE_REMOTE,target=/dvc-fake-remote --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
     fi
 fi
 
