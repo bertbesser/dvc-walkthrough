@@ -92,7 +92,7 @@ git tag -a 0.4 -m '0.4 even more convolutional filters'
 
 # as alice - share code and data with team
 git push -u origin master 0.0 0.1 0.2 0.3 0.4
-dvc push -v -T
+dvc push -T
 
 # as bob - reproduce
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
