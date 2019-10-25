@@ -54,7 +54,7 @@ git tag -a 0.1 -m "0.1 initial pipeline version"
 git push origin master 0.0 0.1
 
 ######
-# PART II develop pipeline
+# PART II develop and reproduce pipeline
 ######
 
 # alice reproduces the pipeline (partially)
@@ -67,73 +67,71 @@ ll
 dvc repro evaluate.dvc
 ll
 
-# alice
+# alice does not have to repro
+dvc repro evaluate.dvc
 
-# alice implements model conversion
+# alice improves the training configuration
+git checkout master
+git reset --hard HEAD
+echo '{ "num_conv_filters" : 64 }' > config/train.json
+dvc repro load.dvc
+git status
+dvc repro evaluate.dvc # also reproduces training
+git status
+git --no-pager diff
+git add .
+git commit -m 'more convolutional filters'
+git tag -a 0.2 -m "0.2 more convolutional filters"
+git push origin master 0.2
+
+######
+# PART III share with team
+######
+
+# chris wants to pick up on the team's work
+
+# bob shares artifacts for 0.1
+git pull
+git checkout 0.1
+dvc push
+
+# alice imitates bob
+git checkout 0.2
+dvc push
+
+# chris continues their work
+git clone git@github.com:bbesser/dvc-livedemo.git livedemo
+cd livedemo
+git tag
+git checkout 0.1
+ll
+dvc pull # fetches training images and model
+ll
+dvc repro evaluate.dvc # all up to date
+git checkout 0.2
+dvc pull # even faster, since it only fetches the model (images are already loaded)
+
+######
+# PART IV extend pipeline (optional)
+######
+
+# chris implements model conversion
 git checkout master
 git reset --hard HEAD
 cp /repo/code/publish.py code
 
-# alice creates the publish stage
+# chris creates the publish stage
 dvc run -f publish.dvc -d model.h5 -o model.onnx python code/publish.py
 git add code/publish.py publish.dvc .gitignore
 git commit -m 'create publish stage (to onnx format)'
+git tag -a 0.3 -m "0.3 publish to onnx"
+git push origin master 0.3
+dvc push
 
-git tag -a 0.2 -m "0.2 publish to onnx"
-
-# TODO
-
-######
-# PART III repro
-######
-
-# partially reproduce pipeline
-echo '{ "num_conv_filters" : 64 }' > config/train.json
-dvc repro load.dvc
-dvc repro train.dvc
-git status # inspect
-git --no-pager diff # inspect
-dvc repro evaluate.dvc publish.dvc
-git status # inspect
-git --no-pager diff # inspect
-git add .
-git commit -m 'more convolutional filters'
-git tag -a 0.3 -m "0.3 more convolutional filters"
-
-# fully reproduce pipeline
-echo '{ "num_conv_filters" : 128 }' > config/train.json
-dvc repro evaluate.dvc publish.dvc
-git status # inspect
-git --no-pager diff # inspect
-git add .
-git commit -m 'even more convolutional filters'
-git tag -a 0.4 -m '0.4 even more convolutional filters'
-
-######
-# PART IV share with team
-######
-
-# as alice - share code and data with team
-git push -u origin master 0.0 0.1 0.2 0.3 0.4
-dvc push -T
-
-# as bob - reproduce
-git clone git@github.com:bbesser/dvc-livedemo.git livedemo
-cd livedemo
-git checkout 0.3
-ls
-ls data # it' not there
-dvc repro load.dvc
-ls data # there it is
-dvc repro publish.dvc # also reproduces the train stage
-ls model
-
-# as chris - retrieve code and artifacts
-git clone git@github.com:bbesser/dvc-livedemo.git livedemo
-cd livedemo
-ls -Al
-ls -Al .dvc
-dvc fetch -T
+# alice inspects chris's work
+git checkout master
+git reset --hard HEAD
 git checkout 0.3
 dvc pull
-dvc repro evaluate.dvc publish.dvc
+ll # model.onnx exists ...
+dvc repro publish.dvc # ... nothing to do
