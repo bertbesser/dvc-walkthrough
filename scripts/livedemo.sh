@@ -8,9 +8,8 @@
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 ls
-ls code
 
-# alice prepares the pipeline setup
+# bob prepares the pipeline setup
 dvc init
 dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
 git status # check what files were created by dvc
