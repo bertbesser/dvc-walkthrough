@@ -4,7 +4,7 @@
 # PART I create pipeline
 ######
 
-# alice checks out code that she has written in the past
+# bob checks out alice's code
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 ls
@@ -18,46 +18,70 @@ git commit -m "init dvc"
 git tag -a 0.0 -m "0.0 freshly initialized project with no pipeline defined, yet"
 git status
 
-# alice creates the pipeline configuration
+# bob creates the pipeline configuration (versioned in git)
 mkdir config
 echo '{ "num_images" : 1000 }' > config/load.json
 echo '{ "num_conv_filters" : 32 }' > config/train.json
 git add config/load.json config/train.json
 git commit -m "create pipeline configuration"
 
-# alice creates the load stage
+# bob runs the pipeline
+./run_pipeline.sh
+du -h
+git status
+
+# bob creates the dvc pipeline stages
+git rm run_pipeline.sh
 dvc run -f load.dvc -d config/load.json -o data python code/load.py
-git add load.dvc .gitignore
-git commit -m "create load stage"
-# alice creates train stage
-dvc run -f train.dvc -d data -d config/train.json -o model/model.h5 python -B code/train.py
-git add train.dvc model/.gitignore
-git commit -m "create train stage"
-# alice creates evaluate stage
-dvc run -f evaluate.dvc -d model/model.h5 -M model/metrics.json python -B code/evaluate.py
-git add model/metrics.json evaluate.dvc
-git commit -m "create evaluate stage"
+dvc run -f train.dvc -d data -d config/train.json -o model.h5 python -B code/train.py
+dvc run -f evaluate.dvc -d model.h5 -M metrics.json python -B code/evaluate.py
+git status
+cat .gitignore
+
+git add *.dvc metrics.json .gitignore
+git commit -m "create dvc stages for alice's pipeline"
 
 # for the sake of completeness - will not be discussed further
 dvc metrics show
 
 # tag the initial pipeline
+echo "
+To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`.
+" > README.md
+git add README.md
+git commit -m 'update readme'
 git tag -a 0.1 -m "0.1 initial pipeline version"
-git status
+git push origin master 0.0 0.1
 
 ######
 # PART II develop pipeline
 ######
 
-# implement model conversion
+# alice reproduces the pipeline (partially)
+git clone git@github.com:bbesser/dvc-livedemo.git livedemo
+cd livedemo
+git checkout 0.1
+ll
+dvc repro load.dvc
+ll
+dvc repro evaluate.dvc
+ll
+
+# alice
+
+# alice implements model conversion
+git checkout master
+git reset --hard HEAD
 cp /repo/code/publish.py code
 
-# create publish stage
-dvc run -f publish.dvc -d model/model.h5 -o model/model.onnx python code/publish.py
-git add code/publish.py publish.dvc model/.gitignore
+# alice creates the publish stage
+dvc run -f publish.dvc -d model.h5 -o model.onnx python code/publish.py
+git add code/publish.py publish.dvc .gitignore
 git commit -m 'create publish stage (to onnx format)'
 
 git tag -a 0.2 -m "0.2 publish to onnx"
+
+# TODO
 
 ######
 # PART III repro

@@ -12,14 +12,14 @@ from prepare_train import load_train_data
 from keras.models import load_model
 from pathlib import Path
 
-MODEL_FOLDER = Path.home().as_posix() + "/livedemo/model"
+REPO_FOLDER = Path.home().as_posix() + "/livedemo"
 
 # load training data
 X, y = load_train_data()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-model = load_model(MODEL_FOLDER + '/model.h5')
+model = load_model(REPO_FOLDER + '/model.h5')
 
 model_metrics = model.evaluate(X_test, y_test, verbose=1)
 metrics = {model.metrics_names[i] : model_metrics[i] for i in range(len(model_metrics))}
-with open(MODEL_FOLDER + '/metrics.json', 'w') as outfile:
+with open(REPO_FOLDER + '/metrics.json', 'w') as outfile:
     json.dump(metrics, outfile)

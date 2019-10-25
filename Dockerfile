@@ -74,4 +74,7 @@ ADD configs/.aws/config /home/$USER/.aws/config
 ADD configs/.aws/credentials /home/$USER/.aws/credentials
 RUN su $USER -c 'echo "export AWS_DEFAULT_PROFILE=besser" >> $HOME/.zshrc'
 
+RUN su $USER -c 'echo "export CUDA_VISIBLE_DEVICES=\"\"" >> $HOME/.zshrc'
+RUN su $USER -c 'echo "export PYTHONHASHSEED=0" >> $HOME/.zshrc'
+
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]
