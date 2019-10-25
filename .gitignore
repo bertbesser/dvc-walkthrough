@@ -3,4 +3,4 @@ mount_folder
 configs/.ssh/id_rsa*
 images/slideshow
 .idea/
-configs/aws/
+configs/.aws/
