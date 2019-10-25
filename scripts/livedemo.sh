@@ -9,15 +9,6 @@ git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 ls
 
-# bob prepares the pipeline setup
-dvc init
-dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
-git status # check what files were created by dvc
-git add .dvc # add all dvc files
-git commit -m "init dvc"
-git tag -a 0.0 -m "0.0 freshly initialized project with no pipeline defined, yet"
-git status
-
 # bob creates the pipeline configuration (versioned in git)
 mkdir config
 echo '{ "num_images" : 1000 }' > config/load.json
@@ -28,6 +19,16 @@ git commit -m "create pipeline configuration"
 # bob runs the pipeline
 ./run_pipeline.sh
 du -h
+git status
+
+# bob prepares the pipeline setup
+dvc init
+git status
+dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
+git status # check what files were created by dvc
+git add .dvc # add all dvc files
+git commit -m "init dvc"
+git tag -a 0.0 -m "0.0 freshly initialized project with no pipeline defined, yet"
 git status
 
 # bob creates the dvc pipeline stages
@@ -41,10 +42,13 @@ cat .gitignore
 git add *.dvc metrics.json .gitignore
 git commit -m "create dvc stages for alice's pipeline"
 
-# for the sake of completeness - will not be discussed further
+# bob inspects metrics
+# // just for the sake of completeness - will not be discussed further
+# // - dvc can format metrics
+# // - dvc can compare metrics of different pipeline versions
 dvc metrics show
 
-# tag the initial pipeline
+# bob tags the initial pipeline
 echo "
 To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`.
 " > README.md
@@ -110,6 +114,7 @@ ll
 dvc repro evaluate.dvc # all up to date
 git checkout 0.2
 dvc pull # even faster, since it only fetches the model (images are already loaded)
+dvc repro evaluate.dvc
 
 ######
 # PART IV extend pipeline (optional)
@@ -131,6 +136,7 @@ dvc push
 # alice inspects chris's work
 git checkout master
 git reset --hard HEAD
+git pull
 git checkout 0.3
 dvc pull
 ll # model.onnx exists ...
