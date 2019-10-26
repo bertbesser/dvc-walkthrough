@@ -77,4 +77,7 @@ RUN su $USER -c 'echo "export AWS_DEFAULT_PROFILE=besser" >> $HOME/.zshrc'
 RUN su $USER -c 'echo "export CUDA_VISIBLE_DEVICES=\"\"" >> $HOME/.zshrc'
 RUN su $USER -c 'echo "export PYTHONHASHSEED=0" >> $HOME/.zshrc'
 
+RUN su $USER -c "cd /home/$USER && mkdir bin && cd bin && wget https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy && chmod +x diff-so-fancy && git config --global core.pager 'diff-so-fancy | less --tabs=4 -RFX'"
+RUN su $USER -c 'echo "export PATH=$PATH:$HOME/bin" >> $HOME/.zshrc'
+
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]

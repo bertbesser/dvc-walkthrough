@@ -94,13 +94,17 @@ git push origin master 0.2
 
 # clair wants to pick up on the team's work
 
-# vince shares artifacts for 0.1
+# vince shares artifacts for 0.1 (he is still at that version)
 git pull
 git checkout 0.1
+# git describe --exact-match HEAD
+dvc repro evaluate.dvc
 dvc push
 
 # dan imitates vince
 git checkout 0.2
+# git describe --exact-match HEAD
+dvc repro evaluate.dvc
 dvc push
 
 # clair continues their work
