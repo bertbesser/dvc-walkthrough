@@ -10,8 +10,8 @@ cd dummy_repo
 
 # configure git repository
 git init
-git config user.name 'dan'
-git config user.email 'dan@dvc.livedemo'
+git config user.name 'vince'
+git config user.email 'vince@dvc.livedemo'
 git remote add origin git@github.com:bbesser/dvc-livedemo.git
 
 # add code
@@ -34,7 +34,7 @@ I'm afraid this will turn out to be a big mess ...
 
 Actually, I think about abandoning the entire thing ... 🙈 🗑
 
-– Dan
+– Vince
 " >> README.md
 git add README.md
 git commit -m 'add cry for help'

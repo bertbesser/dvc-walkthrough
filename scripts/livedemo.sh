@@ -4,24 +4,24 @@
 # PART I create pipeline
 ######
 
-# vince checks out dan's code
+# dan checks out vince's code
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 ls
 
-# vince creates the pipeline configuration (versioned in git)
+# dan creates the pipeline configuration (versioned in git)
 mkdir config
 echo '{ "num_images" : 1000 }' > config/load.json
 echo '{ "num_conv_filters" : 32 }' > config/train.json
 git add config/load.json config/train.json
 git commit -m "create pipeline configuration"
 
-# vince runs the pipeline
+# dan runs the pipeline
 ./run_pipeline.sh
 du -h
 git status
 
-# vince prepares the pipeline setup
+# dan prepares the pipeline setup
 dvc init
 git status
 dvc remote add -d bertsBucket s3://dvc-livedemo.bertatcodecentric.de/dvc-livedemo
@@ -31,7 +31,7 @@ git commit -m "init dvc"
 git tag -a 0.0 -m "0.0 freshly initialized project with no pipeline defined, yet"
 git status
 
-# vince creates the dvc pipeline stages
+# dan creates the dvc pipeline stages
 git rm run_pipeline.sh
 dvc run -f load.dvc -d config/load.json -o data python code/load.py
 dvc run -f train.dvc -d data -d config/train.json -o model.h5 python -B code/train.py
@@ -40,15 +40,15 @@ git status
 cat .gitignore
 
 git add *.dvc metrics.json .gitignore
-git commit -m "create dvc stages for dan's pipeline"
+git commit -m "create dvc stages for vince's pipeline"
 
-# vince inspects metrics
+# dan inspects metrics
 # // just for the sake of completeness - will not be discussed further
 # // - dvc can format metrics
 # // - dvc can compare metrics of different pipeline versions
 dvc metrics show
 
-# vince tags the initial pipeline
+# dan tags the initial pipeline
 echo "
 To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`.
 " > README.md
@@ -61,7 +61,7 @@ git push origin master 0.0 0.1
 # PART II develop and reproduce pipeline
 ######
 
-# dan reproduces the pipeline (partially)
+# vince reproduces the pipeline (partially)
 git clone git@github.com:bbesser/dvc-livedemo.git livedemo
 cd livedemo
 git checkout 0.1
@@ -71,10 +71,10 @@ ll
 dvc repro evaluate.dvc
 ll
 
-# dan does not have to repro
+# vince does not have to repro
 dvc repro evaluate.dvc
 
-# dan improves the training configuration
+# vince improves the training configuration
 git checkout master
 git reset --hard HEAD
 echo '{ "num_conv_filters" : 64 }' > config/train.json
@@ -94,14 +94,14 @@ git push origin master 0.2
 
 # clair wants to pick up on the team's work
 
-# vince shares artifacts for 0.1 (he is still at that version)
+# dan shares artifacts for 0.1 (he is still at that version)
 git pull
 git checkout 0.1
 # git describe --exact-match HEAD
 dvc repro evaluate.dvc
 dvc push
 
-# dan imitates vince
+# vince imitates dan
 git checkout 0.2
 # git describe --exact-match HEAD
 dvc repro evaluate.dvc
@@ -136,7 +136,7 @@ git tag -a 0.3 -m "0.3 publish to onnx"
 git push origin master 0.3
 dvc push
 
-# dan inspects clair's work
+# vince inspects clair's work
 git checkout master
 git reset --hard HEAD
 git pull
