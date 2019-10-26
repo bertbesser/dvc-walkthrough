@@ -37,11 +37,6 @@ ARG GID=1000
 RUN groupadd -g $GID -o $USER
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $USER
 
-ADD configs/.gitconfig /home/$USER/.gitconfig
-RUN chown $USER:$USER /home/$USER/.gitconfig
-RUN su $USER -c "git config --global user.name '$USER'"
-RUN su $USER -c "git config --global user.email '$USER@dvc.livedemo'"
-
 RUN su $USER -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" --unattended'
 
 RUN echo "alias ls='ls --color'" >> /home/$USER/.zshrc
@@ -53,10 +48,6 @@ RUN echo '$HOME/.zsh_colors.sh' >> /home/$USER/.zshrc
 RUN echo 'export PS1="$FG[080]%B%n%b%f$FG[231]@%f$FG[140]%B%m%b%f$FG[231]:%f$FG[209]%B%1~%b%f$FG[231]$%f "' >> /home/$USER/.zshrc
 RUN chown $USER:$USER /home/$USER/.zshrc
 
-RUN su $USER -c "/tmp/fzf/install"
-RUN echo 'export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS" --color=dark --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef "' >> /home/$USER/.zshrc
-RUN chown $USER:$USER /home/$USER/.zshrc
-
 ADD configs/.ssh/config /home/$USER/.ssh/config
 ADD configs/.ssh/id_rsa /home/$USER/.ssh/id_rsa
 ADD configs/.ssh/id_rsa.pub /home/$USER/.ssh/id_rsa.pub
@@ -64,10 +55,23 @@ ADD configs/.ssh/known_hosts /home/$USER/.ssh/known_hosts
 RUN chown -R $USER:$USER /home/$USER/.ssh
 RUN chmod 600 /home/$USER/.ssh/id_rsa
 
+RUN su $USER -c "/tmp/fzf/install"
+RUN echo 'export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS" --color=dark --color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe --color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef "' >> /home/$USER/.zshrc
+RUN su $USER -c 'echo "export PATH=\$PATH:/tmp/fzf/bin" >> $HOME/.zshrc'
+RUN chown $USER:$USER /home/$USER/.zshrc
+
+ADD configs/.gitconfig /home/$USER/.gitconfig
+RUN chown $USER:$USER /home/$USER/.gitconfig
+RUN su $USER -c "git config --global user.name '$USER'"
+RUN su $USER -c "git config --global user.email '$USER@dvc.livedemo'"
+
+RUN su $USER -c "cd /home/$USER && mkdir bin && cd bin && wget https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy && chmod +x diff-so-fancy && git config --global core.pager 'diff-so-fancy | less --tabs=4 -RFX'"
+RUN su $USER -c 'echo "export PATH=\$PATH:$HOME/bin" >> $HOME/.zshrc'
+
 # setup livedemo
 
 ADD scripts/livedemo.sh /tmp/livedemo.sh
-RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{print ": 1571499890:0;"$0}' > /home/$USER/.zsh_history
+RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{printf ": 1571499890:0;"$0" #cmd%2d\n", NR}' > /home/$USER/.zsh_history
 RUN chown $USER:$USER /home/$USER/.zsh_history
 
 ADD configs/.aws/config /home/$USER/.aws/config
@@ -76,8 +80,5 @@ RUN su $USER -c 'echo "export AWS_DEFAULT_PROFILE=besser" >> $HOME/.zshrc'
 
 RUN su $USER -c 'echo "export CUDA_VISIBLE_DEVICES=\"\"" >> $HOME/.zshrc'
 RUN su $USER -c 'echo "export PYTHONHASHSEED=0" >> $HOME/.zshrc'
-
-RUN su $USER -c "cd /home/$USER && mkdir bin && cd bin && wget https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy && chmod +x diff-so-fancy && git config --global core.pager 'diff-so-fancy | less --tabs=4 -RFX'"
-RUN su $USER -c 'echo "export PATH=$PATH:$HOME/bin" >> $HOME/.zshrc'
 
 ENTRYPOINT ["/tini", "--", "sleep", "infinity"]
