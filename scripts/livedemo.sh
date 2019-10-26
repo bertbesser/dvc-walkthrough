@@ -123,9 +123,11 @@ dvc repro evaluate.dvc
 # PART IV extend pipeline (optional)
 ######
 
-# clair implements model conversion
+# clair cleans up working tree
 git checkout master
 git reset --hard HEAD
+
+# clair implements model conversion
 cp /repo/code/publish.py code
 
 # clair creates the publish stage
