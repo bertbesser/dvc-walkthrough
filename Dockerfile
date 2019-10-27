@@ -33,6 +33,7 @@ ADD configs/zsh_colors.sh /tmp/zsh_colors.sh
 ARG USER=dvc
 ARG UID=1000
 ARG GID=1000
+ARG PROMPT_COLOR=231
 
 RUN groupadd -g $GID -o $USER
 RUN useradd -m -u $UID -g $GID -o -s /bin/bash $USER
@@ -45,7 +46,7 @@ RUN chown $USER:$USER /home/$USER/.zshrc
 
 RUN su $USER -c 'cp /tmp/zsh_colors.sh $HOME/.zsh_colors.sh'
 RUN echo '$HOME/.zsh_colors.sh' >> /home/$USER/.zshrc
-RUN echo 'export PS1="$FG[080]%B%n%b%f$FG[231]@%f$FG[140]%B%m%b%f$FG[231]:%f$FG[209]%B%1~%b%f$FG[231]$%f "' >> /home/$USER/.zshrc
+RUN echo "export PS1=\"\$FG[$PROMPT_COLOR]%B%n%b%f\$FG[231]@%f\$FG[$PROMPT_COLOR]%B%m%b%f\$FG[231]:%f\$FG[$PROMPT_COLOR]%B%1~%b%f\$FG[231]\$%f \"" >> /home/$USER/.zshrc
 RUN chown $USER:$USER /home/$USER/.zshrc
 
 ADD configs/.ssh/config /home/$USER/.ssh/config

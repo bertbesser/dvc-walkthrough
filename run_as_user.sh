@@ -18,6 +18,18 @@ then
   exit 1
 fi
 
+promptcolor="231"
+if [ "$user" == 'dave' ]
+then
+  promptcolor=080
+elif [ "$user" == 'vince' ]
+then
+  promptcolor=140
+elif [ "$user" == 'chloe' ]
+then
+  promptcolor=209
+fi
+
 reset=$2
 if [ "$reset" == "--reset" ]
 then
@@ -30,7 +42,7 @@ then
         docker rm dvc-livedemo-$user
 
         # re-build image
-        docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USER=$user -t dvc-livedemo-$user .
+        docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg USER=$user --build-arg PROMPT_COLOR=$promptcolor -t dvc-livedemo-$user .
 
         # start container
         FAKE_REMOTE=/tmp/dvc-fake-remote
