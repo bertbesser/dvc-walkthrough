@@ -95,16 +95,13 @@ git push origin master 0.2
 # chloe wants to pick up on the team's work
 
 # dave shares artifacts for 0.1 (he is still at that version)
-git pull
-git checkout 0.1
-# git describe --exact-match HEAD
-dvc repro evaluate.dvc
+git describe --exact-match HEAD
+dvc repro --dry evaluate.dvc
 dvc push
 
-# vince imitates dave
-git checkout 0.2
-# git describe --exact-match HEAD
-dvc repro evaluate.dvc
+# vince imitates dave for 0.2 (he is still at that version)
+git describe --exact-match HEAD
+dvc repro --dry evaluate.dvc
 dvc push
 
 # chloe continues their work
@@ -114,10 +111,10 @@ git checkout 0.1
 ll
 dvc pull # fetches training images and model
 ll
-dvc repro evaluate.dvc # all up to date
+dvc repro --dry evaluate.dvc # all up to date
 git checkout 0.2
 dvc pull # even faster, since it only fetches the model (images are already loaded)
-dvc repro evaluate.dvc
+dvc repro --dry evaluate.dvc
 
 ######
 # PART IV extend pipeline (optional)
@@ -145,4 +142,4 @@ git pull
 git checkout 0.3
 dvc pull
 ll # model.onnx exists ...
-dvc repro publish.dvc # ... nothing to do
+dvc repro --dry publish.dvc # ... nothing to do
