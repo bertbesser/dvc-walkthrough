@@ -16,10 +16,11 @@ echo '{ "num_conv_filters" : 32 }' > config/train.json
 git add config/load.json config/train.json
 git commit -m "create pipeline configuration"
 
-# dave runs the pipeline
+# dave tests the pipeline, and cleans up afterwards
 ./run_pipeline.sh
-du -h
 git status
+ncdu
+rm -rf data/ metrics.json model.h5
 
 # dave prepares the pipeline setup
 dvc init
@@ -49,9 +50,7 @@ git commit -m "create dvc stages for vince's pipeline"
 dvc metrics show
 
 # dave tags the initial pipeline
-echo "
-To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`.
-" > README.md
+echo "To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`." > README.md
 git add README.md
 git commit -m 'update readme'
 git tag -a 0.1 -m "0.1 initial pipeline version"
