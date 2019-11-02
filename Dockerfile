@@ -8,7 +8,7 @@ ADD configs/tini /tini
 RUN chmod +x /tini
 
 RUN apt update
-RUN apt install -y zsh less nano ncdu
+RUN apt install -y zsh less nano ncdu tree
 
 # install ml env
 
