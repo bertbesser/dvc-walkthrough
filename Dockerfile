@@ -75,7 +75,7 @@ RUN su $USER -c "git config --global user.email '$USER@dvc.livedemo'"
 # setup livedemo
 
 ADD scripts/livedemo.sh /tmp/livedemo.sh
-RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk '{printf ": 1571499890:0;"$0" #cmd%2d\n", NR}' > /home/$USER/.zsh_history
+RUN cat /tmp/livedemo.sh | grep -v '^#' | grep . | awk -F'#' '{print ": 1571499890:0;"$1}' > /home/$USER/.zsh_history
 RUN chown $USER:$USER /home/$USER/.zsh_history
 
 ADD configs/.aws/config /home/$USER/.aws/config
