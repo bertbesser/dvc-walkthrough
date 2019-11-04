@@ -13,7 +13,7 @@ ls
 mkdir config
 echo '{ "num_images" : 1000 }' > config/load.json
 echo '{ "num_conv_filters" : 32 }' > config/train.json
-git add config/load.json config/train.json
+git add config
 git commit -m "create pipeline configuration"
 
 # dave tests the pipeline, and cleans up afterwards
@@ -40,7 +40,7 @@ dvc run -f evaluate.dvc -d model.h5 -M metrics.json python -B code/evaluate.py
 git status
 cat .gitignore
 
-git add *.dvc metrics.json .gitignore
+git add .
 git commit -m "create dvc stages for vince's pipeline"
 
 # dave inspects metrics
@@ -128,7 +128,7 @@ cp /repo/code/publish.py code
 
 # chloe creates the publish stage
 dvc run -f publish.dvc -d model.h5 -o model.onnx python code/publish.py
-git add code/publish.py publish.dvc .gitignore
+git add .
 git commit -m 'create publish stage (to onnx format)'
 git tag -a 0.3 -m "0.3 publish to onnx"
 git push origin master 0.3
