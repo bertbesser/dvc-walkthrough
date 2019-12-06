@@ -306,11 +306,13 @@ $$ git commit -m "0.3 more training data, more convolutions"
 $$ git tag -a 0.3 -m "0.3 more training data, more convolutions"
 </pre>
 
-## <a name="compare-versions"></a>Compare versions
-Recall that we have defined a *metric* for the evaluation stage, in the file `model/metrics.json`. DVC can list metrics files for all tags in the entire Git repository, which allows us to compare model performances for various all versions of our pipeline. Clearly, increasing the amount of training data and adding convolution filters to the neural network improves the model's accuracy.
+## <a name="compare-versions"></a>Versionsvergleich
+Wir erinnern uns, dass wir in der Datei `model/metrics.json` eine Metrik für die *evaluate*-Stage definiert haben.
+DVC kann Metrikdateien für alle Tags im gesamten Git-Repository auflisten, was es uns ermöglicht, die Performance unseres Modells für verschiedene Versionen der Pipeline zu vergleichen.
+Die Erhöhung der Trainingsdatenmenge und das Hinzufügen von Faltungsfiltern zum neuronalen Netzwerk verbessert eindeutig die Accuracy des Modells.
 
 <pre>
-$$ dvc metrics show -T # -T for all tags
+$$ dvc metrics show -T # -T für alle Tags
 ...
 0.1:
         model/metrics.json: [0.896969696969697]
@@ -320,7 +322,9 @@ $$ dvc metrics show -T # -T for all tags
         model/metrics.json: [0.9565656557227626]
 </pre>
 
-Actually, the file `model/metrics.json` stores not only the model's accuracy, but also its loss. To display only the accuracy, we have configured DVC with an XPath expression as follows. This expression is stored in the corresponding stage's `.dvc` file.
+Tatsächlich speichert die Datei `model/metrics.json` nicht nur die Accuracy des Modells, sondern auch den Trainingsloss.
+Um nur die Accuracy anzuzeigen, haben wir DVC mit einem XPath-Ausdruck wie folgt konfiguriert.
+Dieser Ausdruck wird in der `.dvc`-Datei der entsprechenden Stage gespeichert.
 
 <pre>
 $$ dvc metrics modify model/metrics.json --type json --xpath acc
@@ -332,11 +336,15 @@ metric:
 ...
 </pre>
 
-*Remark 1*: DVC also supports metrics stored in CSV files or plain text files. In particular, DVC does not interpret metrics, and instead treats them as plain text.
+*Anmerkung 1*: 
+DVC unterstützt auch Metriken, die in CSV-Dateien oder einfachen Textdateien gespeichert sind.
+Dabei interpretiert DVC die Metriken *nicht* und behandelt sie stattdessen als reinen Text.
 
-*Remark 2*: For consistent metrics display over all pipeline versions, metrics should be configured in the very beginning of your project. In this case, configuration contained in `.dvc`-files is the same for all versions.
+*Anmerkung 2*:
+Um eine konsistente Metrikanzeige über alle Pipeline-Versionen hinweg zu gewährleisten, sollten Metriken gleich zu Beginn eines Projekts konfiguriert werden.
+Dann ist die Konfiguration in .`dvc`-Dateien für alle Versionen gleich.
 
-## Share data
+## Daten teilen
 When developing models in teams, sharing training data, readily trained models, and performance metrics is crucial for efficient collaboration--each team member retraining the same model is a waste of time. Recall that stage output data is not stored in the Git repository. Instead, DVC manages these files in its `.dvc/cache` folder. DVC allows to push cached files to remote storage (SSH, NAS, Amazon, S3, ...). From there, each team member can pull that data to their individual workspace's DVC cache and work with it as usual.
 
 ![dvc remote](https://blog.codecentric.de/files/2019/03/dvc_remote.jpg)
@@ -379,3 +387,4 @@ DVC allows you to define (language-agnostic) reproducible ML pipelines and versi
 - phasen -> stages
 - Rohrleitung -> Pipeline
 - Section header waehlen und in Links einsetzen (links nur fuer welche mit anchor)
+- inline code type setting `pruefen`
