@@ -150,29 +150,35 @@ Stage-Definitionen rufen *beliebige* Befehle auf, d.h. DVC ist sprachunabhängig
 Niemand hindert uns, Stages in Bash, C oder einer anderen Sprachen oder Framework wie R, Spark, PyTorch usw. zu implementieren.
 
 ## <a name="dvc-cached-files"></a>DVC-Cache
-For building up intuition on how DVC and Git work together, let us skip back to our initial Git repository version. Since no pipeline is defined, yet, none of our training data, model, or metrics exist.
+Um eine Vorstellung davon zu bekommen, wie DVC und Git zusammenarbeiten, lasst uns zu unserer ersten Git-Repository-Version zurückkehren.
+Da noch keine Pipeline definiert ist, existieren keine unserer Trainingsdaten, -modelle oder -metriken.
 
-Recall that DVC uses Git to keep track of which output data belongs to the checked out version. Therefore, *additionally* to choosing the version via the `git` command, we have to instruct DVC to synchronize outputs using the `dvc checkout` command. I.e., as when initializing the repository `git` and `dvc` have to be used in tandem.
+Wir erinnern uns, dass DVC Git verwendet, um zu verfolgen, welche Outputs zur ausgecheckten Version gehören.
+Daher müssen wir -- zusätzlich zur Auswahl der Version mit Hilfe des `git`-Befehls -- DVC anweisen, die Outputs mit dem Befehl `dvc checkout` zu synchronisieren.
 
 <pre>
 $$ git checkout 0.0
 $$ dvc checkout
 $$ ls data
-ls: cannot access 'data': No such file or directory # desired :-)
+ls: cannot access 'data': No such file or directory # das ist gewollt :-)
 </pre>
 
-Back to the latest version, we find that DVC has restored all training data.
+Zurück zur neuesten Version stellen wir fest, dass DVC alle Trainingsdaten wiederhergestellt hat.
 
 <pre>
 $$ git checkout 0.1
 $$ dvc checkout
 $$ ls data
-0  1  2  3  4  5  6  7  8  9 # one folder of images for each digit
+0  1  2  3  4  5  6  7  8  9 # ein Ordner für jede Ziffer
 </pre>
 
-Similarly, you can skip to any of your versioned pipelines and inspect their configuration, training data, models, metrics, etc.
+Auf gleiche Weise können wir zu jeder Version unserer Pipelines springen und deren Konfiguration, Trainingsdaten, Modelle, Metriken usw. einsehen.
 
-*Remark*:  Recall that DVC configures Git to ignore output data. How is versioning of such data implemented? DVC manages output data in the repository's subfolder `.dvc/cache` (which is also ignored by Git, as configured in `.dvc/.gitignore`). DVC-cached files are exposed to us as hardlinks from output files into DVC's cache folder, where DVC takes care of managing the hardlinks.
+*Anmerkung*:
+DVC konfiguriert Git so, dass es Outputs ignoriert.
+Wie wird die Versionierung solcher ignorierten Daten implementiert?
+DVC verwaltet Outputs im Unterordner `.dvc/cache` des Repositorys (der auch von Git ignoriert wird, wie in `.dvc/.gitignore` zu sehen).
+Von DVC gecachte Dateien werden uns als Hardlinks bereitgestellt (von Outputdatei in den Cacheordner), wobei DVC sich um die Verwaltung der Hardlinks kümmert.
 
 ![dvc cache](https://blog.codecentric.de/files/2019/03/dvc_cache.jpg)
 
