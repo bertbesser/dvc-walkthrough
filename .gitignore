@@ -1,2 +1,7 @@
 sources.md
 mount_folder
+.idea/
+configs/.aws/
+configs/.ssh/
+images/slideshow/
+
