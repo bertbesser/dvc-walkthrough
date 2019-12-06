@@ -182,8 +182,11 @@ Von DVC gecachte Dateien werden uns als Hardlinks bereitgestellt (von Outputdate
 
 ![dvc cache](https://blog.codecentric.de/files/2019/03/dvc_cache.jpg)
 
-## <a name="reproduce-the-pipeline"></a>Reproduce the pipeline
-Pat yourself on the back. You have mastered *building* a pipeline, which is the hard part. *Reproducing* (parts of) it, i.e., re-executing stages with changed dependencies, is super-easy. First, note that if we do not change any dependencies, there is nothing to be reproduced.
+## <a name="reproduce-the-pipeline"></a>Reproduzieren der Pipeline
+Wir können uns auf die Schulter klopfen.
+Der schwierigste Teil, das Erstellen der Pipeline, haben wir gemeistert.
+Die Reproduktion (von Teilen) einer Pipeline, d.h. die erneute Ausführung von Stages mit geänderten Abhängigkeiten, ist denkbar einfach.
+Zuerst beobachten wir, dass es ohne geänderte Abhängigkeiten nichts zu reproduzieren gibt.
 
 <pre>
 $$ dvc repro evaluate.dvc
@@ -194,7 +197,7 @@ Stage 'evaluate.dvc' didnt change.
 Pipeline is up to date. Nothing to reproduce.
 </pre>
 
-When changing the amount of training data (see pen icon in the following figure) and calling the `dvc repro`-command with parameter `evaluate.dvc` for the last stage (red play icon), the entire pipeline will be reproduced (red arrows).
+Beim Ändern der Trainingsdatenmenge (siehe Stiftsymbol in der folgenden Abbildung) und beim Aufruf des `dvc repro`-Befehls mit dem Parameter `evaluate.dvc` für die letzte Stufe (rotes Play-Symbol) wird die gesamte Pipeline reproduziert (rote Pfeile).
 
 ![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-all-1.jpg)
 
@@ -215,7 +218,7 @@ Stage 'evaluate.dvc' changed.
 Reproducing 'evaluate.dvc'
 </pre>
 
-Observe that DVC tracks changes to dependencies and outputs through md5-sums stored in their corresponding stage's `.dvc`-file:
+DVC verfolgt Änderungen an Dependencies und Outputs durch md5-Summen, die in den `.dvc`-Dateien der entsprechenden Stages gespeichert sind:
 
 <pre>
 $$ git status
@@ -235,7 +238,7 @@ outs:
 +  md5: 8265c35e6eb17e79de9705cbbbd9a515.dir
 </pre>
 
-Let us save this version of our pipeline and tag it.
+Speichern wir diese Version unserer Pipeline und taggen sie.
 
 <pre>
 $$ git add load.dvc train.dvc evaluate.dvc config/load.json model/metrics.json
@@ -243,8 +246,11 @@ $$ git commit -m "0.2 more training data"
 $$ git tag -a 0.2 -m "0.2 more training data"
 </pre>
 
-## Reproduce partially
-What if only training *configuration* changes, but training *data* remains the same? All stages but the load stage should be reproduced. We have control over which stages of the pipeline are reproduced. In a first step, we reproduce only the training stage by issuing the `dvc repro` command with parameter `train.dvc`, the stage in the middle of the pipeline (we increase the number of convolution filters in our neural network).
+## Teilweise Reproduktion
+Was passiert, wenn sich nur die Trainingskonfiguration ändert, die Trainingsdaten aber gleich bleiben?
+Alle Stages außer der *load*-Stage sollten reproduziert werden.
+Wir haben die Kontrolle darüber, welche Stages der Pipeline reproduziert werden.
+In einem ersten Schritt reproduzieren wir nur die *train*-Stage, indem wir den Befehl `dvc repro` mit dem Parameter `train.dvc` aufrufen (wir erhöhen die Anzahl der Faltungsfilter im Netz).
 
 ![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-train-1.jpg)
 
@@ -258,7 +264,8 @@ Stage 'train.dvc' changed.
 Reproducing 'train.dvc'...
 </pre>
 
-We can now reproduce the entire pipeline. Since we already performed re-training, the trained model was changed also, and only the evaluation stage will be executed.
+Wir können nun die gesamte Pipeline reproduzieren.
+Da wir bereits neu trainiert haben, wird nur die *evaluate*-Stage ausgeführt.
 
 ![reproduce-all](https://blog.codecentric.de/files/2019/03/pipeline-repro-evaluate-1.jpg)
 
@@ -272,7 +279,7 @@ Stage 'evaluate.dvc' changed.
 Reproducing 'evaluate.dvc'...
 </pre>
 
-Finally, let us increase the amount of available training data and trigger the entire pipeline by reproducing the `evaluate.dvc` stage.
+Abschließend erhöhen wir die Menge der verfügbaren Trainingsdaten und triggern die gesamte Pipeline durch die Reproduktion der `evaluate.dvc`-Stage.
 
 <pre>
 $$ echo '{ "num_images" : 3000 }' > config/load.json
@@ -291,7 +298,7 @@ Stage 'evaluate.dvc' changed.
 Reproducing 'evaluate.dvc'...
 </pre>
 
-Again, we save this version of our pipeline and tag it.
+Wiederum speichern wir die neue Version unserer Pipeline und taggen sie.
 
 <pre>
 $$ git add config/load.json config/train.json evaluate.dvc load.dvc train.dvc model/metrics.json
@@ -363,3 +370,12 @@ $$ ls data
 
 ## Conclusion
 DVC allows you to define (language-agnostic) reproducible ML pipelines and version pipelines *together with* their associated training data, configuration, performance metrics, etc. Performance metrics can be evaluated for all versions of a pipeline. Training data, trained models, and other associated binary data can be shared (storage-agnostic) with team members for efficient collaboration.
+
+
+# TODO
+- Abhaengigkeit durch Dependency ersetzen
+- Ausgabe durch Output ersetzen
+- stufen -> stages
+- phasen -> stages
+- Rohrleitung -> Pipeline
+- Section header waehlen und in Links einsetzen (links nur fuer welche mit anchor)
