@@ -345,23 +345,34 @@ Um eine konsistente Metrikanzeige über alle Pipeline-Versionen hinweg zu gewäh
 Dann ist die Konfiguration in .`dvc`-Dateien für alle Versionen gleich.
 
 ## Daten teilen
-When developing models in teams, sharing training data, readily trained models, and performance metrics is crucial for efficient collaboration--each team member retraining the same model is a waste of time. Recall that stage output data is not stored in the Git repository. Instead, DVC manages these files in its `.dvc/cache` folder. DVC allows to push cached files to remote storage (SSH, NAS, Amazon, S3, ...). From there, each team member can pull that data to their individual workspace's DVC cache and work with it as usual.
+Bei der Entwicklung von Modellen im Team ist der Austausch von Trainingsdaten, fertig trainierten Modellen und Metriken entscheidend für eine effiziente Zusammenarbeit - wenn jedes Teammitglied das gleiche Modell trainiert, dann verschwenden wir wertvolle Zeit.
+Wie erwähnt werden Outputs einer Stage nicht im Git-Repository gespeichert.
+Stattdessen verwaltet DVC diese Dateien in seinem `.dvc/cache` Ordner.
+DVC ermöglicht es uns, Cache-Dateien auf Remote-Speicher zu kopieren (SSH, NAS, Amazon, S3,....).
+Von dort aus kann jedes Teammitglied diese Daten in den DVC-Cache seines individuellen Arbeitsbereichs ziehen und wie gewohnt damit arbeiten.
 
 ![dvc remote](https://blog.codecentric.de/files/2019/03/dvc_remote.jpg)
 
-For the purpose of this walkthrough, we fake remote storage using a local folder called `/remote`. Here is how to configure the remote and push data to it.
+Für den Zweck dieses Walkthroughs simulieren wir Remote-Speicher mit einem lokalen Ordner namens `/remote`.
+So wird ein Remote konfiguriert und mit Daten gefüllt.
 
 <pre>
 $$ mkdir /remote/dvc-cache
 $$ dvc remote add -d fake_remote /remote/dvc-cache # -d for making the remote default
-$$ git add .dvc/config # save the remote's configuration
+$$ git add .dvc/config # speichert die Remote-Konfiguration
 $$ git commit -m "configure remote"
 $$ dvc push -T
 </pre>
 
-The `-T` parameter pushes cached files for all tags. Note that `dvc push` intelligently pushes only new or changed data, and skips over data that has remained the same since the last push.
+Der `-T`-Parameter kopiert Cache-Dateien für alle Tags.
+Beachte, dass `dvc push` intelligent nur neue oder geänderte Daten kopiert und Daten überspringt, die seit dem letzten Push unverändert geblieben sind.
 
-How would your team member access your pushed data? (If you followed along in your shell, exit the container and recreate it by calling `./start_environment.sh bash`. The following steps are documented in `/home/dvc/scripts/clone.sh` and should be applied in the `/home/dvc`-folder.) Recall that cloning the Git repository will *not* checkout training data, etc. since such files are managed in by DVC. We need to instruct DVC to pull that data from the remote storage. Thereafter, we can access the data as before.
+Wie würde ein Teammitglied auf unsere Daten zugreifen?
+(Wenn Du in der Shell mitgearbeitet hast, dann verlasse den Container und erstelle ihn neu, indem Du `./start_environment.sh bash` aufrufst.
+Die folgenden Schritte sind in `/home/dvc/scripts/clone.sh` dokumentiert und sollten im Ordner `/home/dvc` angewendet werden.)
+Das Klonen des Git-Repositorys lädt keine Trainingsdaten usw., da diese Dateien von DVC verwaltet werden.
+Wir müssen DVC anweisen, diese Daten aus dem Remote-Speicher zu holen.
+Danach können wir wie bisher auf die Daten zugreifen.
 
 <pre>
 $$ cd /home/dvc
@@ -369,16 +380,20 @@ $$ git clone /remote/git-repo walkthrough-cloned
 $$ cd walkthrough-cloned
 $$ ls data
 ls: cannot access 'data': No such file or directory # no training data there :(
-$$ dvc pull -T # -T to pull for all tags
+$$ dvc pull -T # -T um Daten für alle Tags zu ziehen
 $$ ls data
-0  1  2  3  4  5  6  7  8  9 # theeere is our training data :)
+0  1  2  3  4  5  6  7  8  9 # daaaaa sind die Trainingsdaten :)
 </pre>
 
-*Remark*: Pushing/pulling DVC-managed data for all tags (`-T` parameter) is not advisable in general, since you will send/receive *lots* of data.
+*Anmerkung*:
+Das Pushen/Pullen für alle Tags (`-T`-Parameter) ist im Allgemeinen nicht empfehlenswert, da viele Daten gesendet/empfangen werden.
 
-## Conclusion
-DVC allows you to define (language-agnostic) reproducible ML pipelines and version pipelines *together with* their associated training data, configuration, performance metrics, etc. Performance metrics can be evaluated for all versions of a pipeline. Training data, trained models, and other associated binary data can be shared (storage-agnostic) with team members for efficient collaboration.
+## Fazit
+Mit DVC können wir (sprachunabhängige) reproduzierbare ML-Pipelines erstellen und zusammen mit den zugehörigen Trainingsdaten, Konfigurationen, Metriken usw. versionieren.
+Metriken können für alle Versionen einer Pipeline ausgewertet werden.
+Trainingsdaten, trainierte Modelle und andere zugehörige Binärdaten können mit Teammitgliedern über die Cloud geteilt werden, um eine effiziente Zusammenarbeit zu gewährleisten.
 
+In diesem [Folgebeitrag](https://blog.codecentric.de/en/2019/08/dvc-dependency-management/) zeigen wir, wie man DVC-Artefakte als Dependencies in andere Projekte einbinden kann.
 
 # TODO
 - Abhaengigkeit durch Dependency ersetzen
@@ -386,5 +401,6 @@ DVC allows you to define (language-agnostic) reproducible ML pipelines and versi
 - stufen -> stages
 - phasen -> stages
 - Rohrleitung -> Pipeline
+- Leistungs(kennzahlen/daten) -> Metriken
 - Section header waehlen und in Links einsetzen (links nur fuer welche mit anchor)
 - inline code type setting `pruefen`
