@@ -57,17 +57,21 @@ $$ git commit -m "init dvc"
 $$ git tag -a 0.0 -m "freshly initialized with no pipeline defined, yet"
 </pre>
 
-## Define the pipeline
-Our pipeline consists of three stages, namely
-1. loading data,
-2. training, and
-3. evalutation,
+## Pipeline erstellen
+Unsere Pipeline besteht aus drei sogenannten *Stages*, nämlich
+1. Daten laden,
+2. Training und
+3. Auswertung.
 
-and the pipeline also produces performance metrics of the trained model. Here is a schematic:
+Hier ist eine Übersicht:
 
 ![pipeline](https://blog.codecentric.de/files/2019/03/pipeline-3.jpg)
 
-For simplicity, we implement a dummy loading stage, which just copies given raw image data into the repository. However, since our goal is to retrain the model as more and more data is available, our loading stage can be configured for the amount of data to be copied. This configuration is located in the file `config/load.json`. Similarly, training stage configuration is located in `config/train.json` (our neural network's architecture allows to alter the number of convolution filters). Let's put this congiuration under version control.
+Wir implementieren eine Dummy-*load*-stage, die lediglich vorgegebene Rohbilddaten in das Repository kopiert.
+Da unser Ziel ist, das Modell neu zu trainieren, wannimmer neue Trainingsbilder verfügbar sind, kann die zu kopierende Datenmenge konfiguriert wird.
+Diese Konfiguration befindet sich in der Datei `config/load.json`.
+Die Konfiguration der Trainingsphase befindet sich in `config/train.json` (die Architektur unseres neuronalen Netzwerks erlaubt eine variable Anzahl von Faltungsfiltern).
+Wir sollten unsere Konfiguration unter Versionskontrolle stellen!
 
 <pre>
 $$ mkdir config
@@ -77,9 +81,17 @@ $$ git add config/load.json config/train.json
 $$ git commit -m "add config"
 </pre>
 
-Stages of a DVC pipeline are connected by *dependencies* and *outputs*. Dependencies and outputs are simply files. E.g. our load stage *depends* on the configuration file `config/load.json`. The load stage *outputs* training image data. If upon execution of our load stage the set of training images changes, the training stage picks up these changes, since it depends on the training images. Similarly, a changed model will be evaluated to obtain its performance metrics. Once the pipeline definition is in place, DVC takes care of reproducing only those stages with changed dependencies, as we discuss in detail in section [Reproduce the pipeline](#reproduce-the-pipeline).
+Die Stages einer DVC-Pipeline werden durch Abhängigkeiten (*Dependencies*) und Ausgaben (*Outputs*) miteinander verbunden.
+Dependencies und Outputs sind einfach Dateien.
+Z.B. hängt unsere *load*-Stage von der Konfigurationsdatei `config/load.json` ab.
+Die *load*-Stage gibt Trainingsbilder aus.
+Wenn sich bei Ausführung unserer *load*-Stage die Menge von Trainingsbildern ändert, dann erkennt die *train*-Stage diese Änderungen, da die Bildermenge eine Dependency von *train* ist.
+Anschließend wird das neu trainierte Modell mit Metriken bewertet.
+Mit Hilfe der Pipeline-Definition kümmert sich DVC darum, nur die Stufen mit geänderten Abhängigkeiten neu auszuführen, wie wir im Abschnitt [Reproduzieren der Pipeline](#reproduce-the-pipeline) detailliert besprechen. 
 
-The following `dvc run` command configures our load stage, where the stage's definition is stored in the file given by the `-f` parameter, dependencies are provided using the `-d` parameter, and training image data is output into the folder `data` given by the `-o` parameter. DVC immediately executes the stage, already generating the desired training data.
+Der folgende `dvc run`-Befehl erstellt unsere *load*-Stage, wobei die Definition dieser Stage in der durch den Parameter `-f` angegebenen Datei gespeichert wird.
+Abhängigkeiten werden mit dem Parameter `-d` angegeben, in den im Parameter `-o` angegebenen Order schreibt das Skript `code/load.py` die kopierten Daten.
+DVC führt die Stage sofort aus und erzeugt damit bereits die gewünschten Trainingsdaten.
 
 <pre>
 $$ dvc run -f load.dvc -d config/load.json -o data python code/load.py
@@ -96,9 +108,14 @@ $$ git add .gitignore load.dvc
 git commit -m "init load stage"
 </pre>
 
-Recall that our load stage outputs image data into the folder `data`. DVC has added the `data` folder to Git's ignore list. This is because large binary files are not to be versioned in Git repositories. See section [DVC-cached files](#dvc-cached-files) on how DVC manages such data.
+Unsere *load*-Stage schreibt Bilddaten in den Ordner `data`.
+DVC hat diesen Ordner zur Ignorierliste von Git hinzugefügt, denn Git-Repositories eignen sich nicht, große Binärdateien zu versionieren.
+Im Abschnitt [DVC-Cache](#dvc-cached-files) besprechen wird, wie DVC solche Daten verwaltet.
 
-After adding `.gitignore` and `load.dvc` to version control, we define the other two stages of our pipeline analogously, see the following code block. Note the dependency of our training stage to the training config file. Since training typically takes long times (not so in our toy project, though), we output the readily trained model into a file, namely `model/model.h5`. As DVC versions this binary file, we have easy access to this version of our model in the future.
+Nachdem wir `.gitignore` und `load.dvc` unter Versionskontrolle gestellt haben, definieren wir die beiden anderen Stages unserer Pipeline analog (vgl. folgender Codeblock).
+Dabei hängt unsere *train*-Stage von der Trainingskonfigurationsdatei ab.
+Da das Training typischerweise lange dauert (anders als in unserem Spielzeugprojekt), geben wir das fertig trainierte Modell in einer Datei aus, nämlich `model/model.h5`.
+Da DVC auch diese Binärdatei verwaltet, haben wir in Zukunft einfachen Zugriff auf diese Version unseres Modells.
 
 <pre>
 $$ dvc run -f train.dvc -d data -d config/train.json -o model/model.h5 python code/train.py
@@ -107,7 +124,9 @@ $$ dvc run -f evaluate.dvc -d model/model.h5 -M model/metrics.json python code/e
 ...
 </pre>
 
-For the evaluation stage, observe the definition of the file `model/metrics.json` as a *metric* (`-M` parameter). Metrics can be inspected using the `dvc metrics` command, as we discuss in section [Compare versions](#compare-versions). To wrap up our first version of the pipeline, we put all stage definitions (`.dvc`-files) under version control and add a tag.
+Für die *evaluate*-Stage definieren wir die Ausgabe `model/metrics.json` als *Metrik* (`-M`-Parameter).
+Metriken können mit dem Befehl `dvc metrics` überprüft werden, wie wir im Abschnitt [Versionsvergleich](#compare-versions) erläutern.
+Um unsere erste Version der Pipeline zu sichern, stellen wir alle Stage-Definitionen (`.dvc`-Dateien) unter Versionskontrolle und erstellen einen Git-Tag.
 
 <pre>
 $$ git add ...
@@ -115,9 +134,10 @@ $$ git commit ...
 $$ git tag -a 0.1 -m "initial pipeline version 0.1"
 </pre>
 
-*Remark*: DVC does not only support tags for organizing versions of your pipeline, it also allows to utilize branch structures.
+*Anmerkung*:
+DVC unterstützt nicht nur Git-Tags für die Organisation Pipeline-Versionen, sondern auch Branches.
 
-Finally, let's have a brief look at how DVC renders our pipeline.
+Abschließend werfen wir einen kurzen Blick darauf, wie DVC unsere Pipeline darstellt.
 
 <pre>
 $$ dvc pipeline show --ascii evaluate.dvc
@@ -125,9 +145,11 @@ $$ dvc pipeline show --ascii evaluate.dvc
 
 ![pipeline rendered by dvc](https://blog.codecentric.de/files/2019/03/pipeline-dvc-1.jpg)
 
-*Remark*: Observe that stage definitions call arbitrary commands, i.e., DVC is language-agnostic and not bound to Python. No one can stop you from implementing stages in Bash, C, or any other of your favorite languages and frameworks like R, Spark, PyTorch, etc.
+*Anmerkung*:
+Stage-Definitionen rufen *beliebige* Befehle auf, d.h. DVC ist sprachunabhängig und nicht an Python gebunden.
+Niemand hindert uns, Stages in Bash, C oder einer anderen Sprachen oder Framework wie R, Spark, PyTorch usw. zu implementieren.
 
-## <a name="dvc-cached-files"></a>DVC-cached files
+## <a name="dvc-cached-files"></a>DVC-Cache
 For building up intuition on how DVC and Git work together, let us skip back to our initial Git repository version. Since no pipeline is defined, yet, none of our training data, model, or metrics exist.
 
 Recall that DVC uses Git to keep track of which output data belongs to the checked out version. Therefore, *additionally* to choosing the version via the `git` command, we have to instruct DVC to synchronize outputs using the `dvc checkout` command. I.e., as when initializing the repository `git` and `dvc` have to be used in tandem.
