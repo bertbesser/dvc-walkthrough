@@ -1,6 +1,6 @@
 sources.md
 mount_folder
 configs/.ssh/id_rsa*
-images/slideshow
-.idea/
 configs/.aws/
+configs/.ssh/
+images/slideshow
