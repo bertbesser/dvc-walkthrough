@@ -18,16 +18,16 @@ then
   exit 1
 fi
 
-promptcolor="231"
+promptcolor="ffffff"
 if [ "$user" == 'dave' ]
 then
-  promptcolor=080
+  promptcolor="27aec7"
 elif [ "$user" == 'vince' ]
 then
-  promptcolor=140
+  promptcolor="8a6cb6"
 elif [ "$user" == 'chloe' ]
 then
-  promptcolor=209
+  promptcolor="e85e3a"
 fi
 
 reset=$2
@@ -47,7 +47,7 @@ then
         # start container
         FAKE_REMOTE=/tmp/dvc-fake-remote
         mkdir -p $FAKE_REMOTE
-        docker run -d --hostname dvc-livedemo --dns=8.8.8.8 --mount type=bind,source=$FAKE_REMOTE,target=/dvc-fake-remote --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
+        docker run -d --hostname dvc --dns=8.8.8.8 --mount type=bind,source=$FAKE_REMOTE,target=/dvc-fake-remote --mount type=bind,source=$SRC_FOLDER,target=/repo --name dvc-livedemo-$user dvc-livedemo-$user
     fi
 fi
 

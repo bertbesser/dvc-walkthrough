@@ -53,8 +53,15 @@ RUN su $USER -c 'echo "export PATH=\$PATH:$HOME/bin" >> $HOME/.zshrc'
 
 RUN su $USER -c 'cp /tmp/zsh_colors.sh $HOME/.zsh_colors.sh'
 RUN echo '$HOME/.zsh_colors.sh' >> /home/$USER/.zshrc
-RUN echo "export PS1=\"\$FG[$PROMPT_COLOR]%B%n%b%f\$FG[231]:%f\$FG[$PROMPT_COLOR]%B%1~%b%f\$FG[231]\$%f \"" >> /home/$USER/.zshrc
+RUN echo "zstyle :prompt:pure:user color '#$PROMPT_COLOR'" >> /home/$USER/.zshrc
+RUN echo "zstyle :prompt:pure:path color '#$PROMPT_COLOR'" >> /home/$USER/.zshrc
 RUN chown $USER:$USER /home/$USER/.zshrc
+
+RUN su $USER -c "mkdir -p /home/$USER/.zsh"
+RUN su $USER -c "git clone https://github.com/sindresorhus/pure.git /home/$USER/.zsh/pure"
+RUN su $USER -c "echo 'fpath+=/home/$USER/.zsh/pure' >> /home/$USER/.zshrc"
+RUN su $USER -c "echo 'autoload -U promptinit; promptinit' >> /home/$USER/.zshrc"
+RUN su $USER -c "echo 'prompt pure' >> /home/$USER/.zshrc"
 
 RUN echo "alias ls='ls -1 --color'" >> /home/$USER/.zshrc
 RUN echo "alias ll='ls -l --color'" >> /home/$USER/.zshrc
