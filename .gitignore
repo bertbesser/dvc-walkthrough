@@ -4,3 +4,4 @@ configs/.ssh/id_rsa*
 configs/.aws/
 configs/.ssh/
 images/slideshow
+.idea
