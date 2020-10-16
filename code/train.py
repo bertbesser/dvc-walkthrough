@@ -46,7 +46,12 @@ X, y = load_train_data()
 
 # train
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=BATCH_SIZE, epochs=10, verbose=1)
+history = model.fit(np.asarray(X_train), np.asarray(y_train), batch_size=BATCH_SIZE, epochs=10, verbose=1)
 
 # generate output
 model.save(REPO_FOLDER + '/model.h5')
+np.savetxt("history.csv",
+           np.array([history.history["loss"], history.history["acc"]]).transpose(),
+           header="loss,acc",
+           delimiter=",",
+           comments='')

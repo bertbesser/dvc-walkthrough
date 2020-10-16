@@ -21,7 +21,7 @@ cat run_pipeline.sh
 ./run_pipeline.sh
 git status
 ncdu
-rm -rf data/ metrics.json model.h5
+rm -rf data/ metrics.json model.h5 history.csv
 
 # dave prepares the pipeline setup
 dvc init
@@ -36,7 +36,7 @@ git status
 # dave creates the dvc pipeline stages
 git rm run_pipeline.sh
 dvc run -n load -d config/load.json -o data python code/load.py
-dvc run -n train -d data -d config/train.json -o model.h5 python -B code/train.py
+dvc run -n train -d data -d config/train.json -o model.h5 --plots-no-cache history.csv python -B code/train.py
 dvc run -n evaluate -d model.h5 -M metrics.json python -B code/evaluate.py
 git status
 cat .gitignore
@@ -49,6 +49,7 @@ git commit -m "create dvc stages for vince's pipeline"
 # // - dvc can format metrics
 # // - dvc can compare metrics of different pipeline versions
 dvc metrics show
+dvc plots show -o /dvc-livedemo-share/loss-history.html -y loss --title "DVC livedemo" --x-label epoch history.csv
 
 # dave tags the initial pipeline
 echo "To reproduce, \`git checkout\` a tag and then \`dvc repro evaluate.dvc\`." > README.md
@@ -87,6 +88,9 @@ git add .
 git commit -m 'more convolutional filters'
 git tag -a 0.2 -m "0.2 more convolutional filters"
 git push origin master 0.2
+
+# vince checks performance progress using plots
+dvc plots diff -o /dvc-livedemo-share/loss-history.html -y loss --title "DVC livedemo" --x-label epoch 0.2 0.1
 
 ######
 # PART III share with team
