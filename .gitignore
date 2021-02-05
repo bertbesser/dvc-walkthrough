@@ -1,7 +1,8 @@
 sources.md
 mount_folder
-.idea/
+configs/.ssh/id_rsa*
 configs/.aws/
 configs/.ssh/
-images/slideshow/
-
+images/slideshow
+.idea
+code/__pycache__/

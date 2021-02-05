@@ -8,11 +8,12 @@ import numpy as np
 import os
 from scipy import misc
 import json
+from pathlib import Path
 
 NUM_CLASSES = 10
-DATA_FOLDER = "/home/dvc/walkthrough/data"
+DATA_FOLDER = Path.home().as_posix() + "/livedemo/data"
 
-def load_data():
+def load_train_data():
     X, y = [], []
     for digit in range(NUM_CLASSES):
         for image in os.listdir(os.path.join(DATA_FOLDER, str(digit))):
